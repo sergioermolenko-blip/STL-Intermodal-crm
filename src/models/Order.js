@@ -19,6 +19,10 @@ const orderSchema = new mongoose.Schema({
     cargo_name: { type: String, required: true },
     cargo_weight: { type: Number, required: true },
 
+    // Даты
+    date_loading: { type: Date, required: true },
+    date_unloading: { type: Date, required: true },
+
     // Финансы
     client_rate: { type: Number, required: true }, // Ставка Клиента
     carrier_rate: { type: Number, required: true }, // Ставка Перевозчика

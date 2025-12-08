@@ -89,6 +89,17 @@ function formatDate(dateString) {
     });
 }
 
+/**
+ * Форматирование даты для input[type="date"] (YYYY-MM-DD)
+ */
+function formatDateForInput(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // ============================================
 // MODAL FUNCTIONS
 // ============================================
@@ -279,6 +290,8 @@ async function loadOrders() {
  */
 function createOrderCard(order) {
     const createdDate = formatDate(order.created_at);
+    const loadingDate = order.date_loading ? formatDate(order.date_loading) : 'Не указана';
+    const unloadingDate = order.date_unloading ? formatDate(order.date_unloading) : 'Не указана';
     const clientName = order.client?.name || 'Не указан';
     const carrierName = order.carrier?.name || 'Не указан';
     const marginColor = order.margin >= 0 ? '#28a745' : '#dc3545';
@@ -299,6 +312,14 @@ function createOrderCard(order) {
                 <div class="order-detail">
                     <strong>Вес:</strong>
                     <span>${order.cargo_weight} кг</span>
+                </div>
+                <div class="order-detail">
+                    <strong>Дата погрузки:</strong>
+                    <span>${loadingDate}</span>
+                </div>
+                <div class="order-detail">
+                    <strong>Дата выгрузки:</strong>
+                    <span>${unloadingDate}</span>
                 </div>
                 <div class="order-detail">
                     <strong>Клиент:</strong>
@@ -327,6 +348,11 @@ function createOrderCard(order) {
                     <span>${createdDate}</span>
                 </div>
             </div>
+            <div class="order-actions" style="margin-top: 1rem; text-align: right;">
+                <button class="btn-icon btn-edit" onclick='openEditOrder(${JSON.stringify(order).replace(/'/g, "&apos;")})' title="Редактировать">
+                    ✏️ Редактировать
+                </button>
+            </div>
         </div>
     `;
 }
@@ -344,6 +370,8 @@ orderForm.addEventListener('submit', async (e) => {
         route_to: formData.get('route_to').trim(),
         cargo_name: formData.get('cargo_name').trim(),
         cargo_weight: parseFloat(formData.get('cargo_weight')),
+        date_loading: formData.get('date_loading'),
+        date_unloading: formData.get('date_unloading'),
         clientName: formData.get('clientName').trim(),
         carrierName: formData.get('carrierName').trim(),
         client_rate: parseFloat(formData.get('clientRate')),
@@ -351,7 +379,8 @@ orderForm.addEventListener('submit', async (e) => {
     };
 
     if (!orderData.route_from || !orderData.route_to || !orderData.cargo_name ||
-        !orderData.cargo_weight || !orderData.clientName || !orderData.carrierName ||
+        !orderData.cargo_weight || !orderData.date_loading || !orderData.date_unloading ||
+        !orderData.clientName || !orderData.carrierName ||
         isNaN(orderData.client_rate) || isNaN(orderData.carrier_rate)) {
         showMessage('✗ Пожалуйста, заполните все обязательные поля', 'error');
         return;
@@ -369,6 +398,37 @@ orderForm.addEventListener('submit', async (e) => {
 
     await createOrder(orderData);
 });
+
+// ============================================
+// ORDER EDITING
+// ============================================
+
+/**
+ * Open edit order modal
+ */
+window.openEditOrder = function (order) {
+    document.getElementById('editOrderId').value = order._id;
+    document.getElementById('editRouteFrom').value = order.route_from;
+    document.getElementById('editRouteTo').value = order.route_to;
+    document.getElementById('editCargoName').value = order.cargo_name;
+    document.getElementById('editCargoWeight').value = order.cargo_weight;
+    document.getElementById('editDateLoading').value = formatDateForInput(order.date_loading);
+    document.getElementById('editDateUnloading').value = formatDateForInput(order.date_unloading);
+    document.getElementById('editClientName').value = order.client?.name || '';
+    document.getElementById('editCarrierName').value = order.carrier?.name || '';
+    document.getElementById('editClientRate').value = order.client_rate;
+    document.getElementById('editCarrierRate').value = order.carrier_rate;
+
+    document.getElementById('editOrderModal').classList.remove('hidden');
+};
+
+/**
+ * Close edit order modal
+ */
+window.closeEditOrderModal = function () {
+    document.getElementById('editOrderModal').classList.add('hidden');
+    document.getElementById('editOrderForm').reset();
+};
 
 // ============================================
 // CLIENTS SECTION
@@ -673,6 +733,50 @@ function init() {
     loadOrders();
     loadClients();
     loadCarriers();
+
+    // Initialize edit order form handler
+    const editOrderForm = document.getElementById('editOrderForm');
+    if (editOrderForm) {
+        editOrderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const orderId = document.getElementById('editOrderId').value;
+            const orderData = {
+                route_from: document.getElementById('editRouteFrom').value.trim(),
+                route_to: document.getElementById('editRouteTo').value.trim(),
+                cargo_name: document.getElementById('editCargoName').value.trim(),
+                cargo_weight: parseFloat(document.getElementById('editCargoWeight').value),
+                date_loading: document.getElementById('editDateLoading').value,
+                date_unloading: document.getElementById('editDateUnloading').value,
+                clientName: document.getElementById('editClientName').value.trim(),
+                carrierName: document.getElementById('editCarrierName').value.trim(),
+                client_rate: parseFloat(document.getElementById('editClientRate').value),
+                carrier_rate: parseFloat(document.getElementById('editCarrierRate').value)
+            };
+
+            try {
+                const response = await fetch(`${API_ORDERS}/${orderId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Ошибка при обновлении заказа');
+                }
+
+                showMessage('✓ Заказ успешно обновлен!', 'success');
+                closeEditOrderModal();
+                loadOrders();
+            } catch (error) {
+                console.error('❌ Ошибка обновления заказа:', error);
+                showMessage(`✗ Ошибка: ${error.message}`, 'error');
+            }
+        });
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);

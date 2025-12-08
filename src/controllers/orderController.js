@@ -21,7 +21,8 @@ exports.createOrder = async (req, res) => {
         const {
             clientName, carrierName,
             client_rate, carrier_rate,
-            route_from, route_to, cargo_name, cargo_weight
+            route_from, route_to, cargo_name, cargo_weight,
+            date_loading, date_unloading
         } = req.body;
 
         // 1. Ищем или создаем КЛИЕНТА
@@ -53,6 +54,8 @@ exports.createOrder = async (req, res) => {
             route_to,
             cargo_name,
             cargo_weight,
+            date_loading,
+            date_unloading,
             client_rate: Number(client_rate),
             carrier_rate: Number(carrier_rate),
             margin,
@@ -70,6 +73,75 @@ exports.createOrder = async (req, res) => {
     } catch (err) {
         console.error("❌ Ошибка при создании заказа:", err);
         res.status(400).json({ message: "Ошибка создания: " + err.message });
+    }
+};
+
+// Обновить заказ
+exports.updateOrder = async (req, res) => {
+    try {
+        const orderId = req.params.id;
+        const {
+            clientName, carrierName,
+            client_rate, carrier_rate,
+            route_from, route_to, cargo_name, cargo_weight,
+            date_loading, date_unloading
+        } = req.body;
+
+        // 1. Найти заказ
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Заказ не найден' });
+        }
+
+        // 2. Если пришли новые имена клиента/перевозчика - найти/создать их
+        let clientId = order.client;
+        let carrierId = order.carrier;
+
+        if (clientName) {
+            let clientDoc = await Client.findOne({ name: clientName });
+            if (!clientDoc) {
+                clientDoc = await Client.create({ name: clientName });
+                console.log(`✅ Создан новый клиент: ${clientName}`);
+            }
+            clientId = clientDoc._id;
+        }
+
+        if (carrierName) {
+            let carrierDoc = await Carrier.findOne({ name: carrierName });
+            if (!carrierDoc) {
+                carrierDoc = await Carrier.create({ name: carrierName });
+                console.log(`✅ Создан новый перевозчик: ${carrierName}`);
+            }
+            carrierId = carrierDoc._id;
+        }
+
+        // 3. Пересчитать маржу
+        const newClientRate = client_rate !== undefined ? Number(client_rate) : order.client_rate;
+        const newCarrierRate = carrier_rate !== undefined ? Number(carrier_rate) : order.carrier_rate;
+        const margin = newClientRate - newCarrierRate;
+
+        // 4. Обновить поля
+        order.client = clientId;
+        order.carrier = carrierId;
+        order.route_from = route_from || order.route_from;
+        order.route_to = route_to || order.route_to;
+        order.cargo_name = cargo_name || order.cargo_name;
+        order.cargo_weight = cargo_weight !== undefined ? cargo_weight : order.cargo_weight;
+        order.date_loading = date_loading || order.date_loading;
+        order.date_unloading = date_unloading || order.date_unloading;
+        order.client_rate = newClientRate;
+        order.carrier_rate = newCarrierRate;
+        order.margin = margin;
+
+        const updatedOrder = await order.save();
+        await updatedOrder.populate('client carrier');
+
+        console.log(`✅ Заказ обновлен: ${order.route_from} → ${order.route_to}`);
+        res.json(updatedOrder);
+
+    } catch (err) {
+        console.error("❌ Ошибка при обновлении заказа:", err);
+        res.status(400).json({ message: "Ошибка обновления: " + err.message });
     }
 };
 

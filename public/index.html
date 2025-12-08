@@ -87,6 +87,18 @@
                             </div>
                         </div>
 
+                        <!-- Даты -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date_loading">Дата погрузки</label>
+                                <input type="date" id="date_loading" name="date_loading" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date_unloading">Дата выгрузки</label>
+                                <input type="date" id="date_unloading" name="date_unloading" required>
+                            </div>
+                        </div>
+
                         <!-- Финансы -->
                         <div class="form-row">
                             <div class="form-group">
@@ -241,6 +253,85 @@
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Order Modal -->
+    <div id="editOrderModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Редактирование заказа</h2>
+                <button class="modal-close" onclick="closeEditOrderModal()">×</button>
+            </div>
+            <form id="editOrderForm" class="modal-form">
+                <input type="hidden" id="editOrderId">
+
+                <!-- Маршрут -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editRouteFrom">Откуда (пункт отправления) *</label>
+                        <input type="text" id="editRouteFrom" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRouteTo">Куда (пункт назначения) *</label>
+                        <input type="text" id="editRouteTo" required>
+                    </div>
+                </div>
+
+                <!-- Груз -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCargoName">Наименование груза *</label>
+                        <input type="text" id="editCargoName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCargoWeight">Вес (кг) *</label>
+                        <input type="number" id="editCargoWeight" min="0" step="0.01" required>
+                    </div>
+                </div>
+
+                <!-- Даты -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editDateLoading">Дата погрузки *</label>
+                        <input type="date" id="editDateLoading" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDateUnloading">Дата выгрузки *</label>
+                        <input type="date" id="editDateUnloading" required>
+                    </div>
+                </div>
+
+                <!-- Участники -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editClientName">Клиент *</label>
+                        <input type="text" id="editClientName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCarrierName">Перевозчик *</label>
+                        <input type="text" id="editCarrierName" required>
+                    </div>
+                </div>
+
+                <!-- Финансы -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editClientRate">Ставка клиента (₽) *</label>
+                        <input type="number" id="editClientRate" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCarrierRate">Ставка перевозчика (₽) *</label>
+                        <input type="number" id="editCarrierRate" min="0" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditOrderModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
                 </div>
             </form>
         </div>
