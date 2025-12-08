@@ -15,23 +15,25 @@ const carriersTableBody = document.getElementById('carriersTableBody');
 const navButtons = document.querySelectorAll('.nav-btn');
 const sections = document.querySelectorAll('.content-section');
 
+// Modal elements
+const editModal = document.getElementById('editModal');
+const editForm = document.getElementById('editForm');
+const modalTitle = document.getElementById('modalTitle');
+const clientFieldsDiv = document.getElementById('clientFields');
+const carrierFieldsDiv = document.getElementById('carrierFields');
+
 /**
  * Navigation - Switch between sections
  */
 function switchSection(sectionId) {
-    // Hide all sections
     sections.forEach(section => section.classList.add('hidden'));
-
-    // Remove active class from all nav buttons
     navButtons.forEach(btn => btn.classList.remove('active'));
 
-    // Show selected section
     const targetSection = document.getElementById(`${sectionId}-section`);
     if (targetSection) {
         targetSection.classList.remove('hidden');
     }
 
-    // Add active class to clicked button
     const activeButton = document.querySelector(`[data-section="${sectionId}"]`);
     if (activeButton) {
         activeButton.classList.add('active');
@@ -59,7 +61,6 @@ function showMessage(text, type = 'success') {
     messageDiv.textContent = text;
     messageDiv.className = `message ${type}`;
 
-    // Автоматически скрыть через 5 секунд
     setTimeout(() => {
         messageDiv.classList.add('hidden');
     }, 5000);
@@ -87,6 +88,83 @@ function formatDate(dateString) {
         year: 'numeric'
     });
 }
+
+// ============================================
+// MODAL FUNCTIONS
+// ============================================
+
+/**
+ * Open edit modal for client
+ */
+window.openEditClient = function (clientId, clientData) {
+    document.getElementById('editId').value = clientId;
+    document.getElementById('editType').value = 'client';
+    document.getElementById('editName').value = clientData.name;
+    document.getElementById('editPhone').value = clientData.phone || '';
+    document.getElementById('editInn').value = clientData.inn || '';
+    document.getElementById('editContactPerson').value = clientData.contactPerson || '';
+    document.getElementById('editEmail').value = clientData.email || '';
+
+    modalTitle.textContent = 'Редактирование клиента';
+    clientFieldsDiv.classList.remove('hidden');
+    carrierFieldsDiv.classList.add('hidden');
+
+    editModal.classList.remove('hidden');
+};
+
+/**
+ * Open edit modal for carrier
+ */
+window.openEditCarrier = function (carrierId, carrierData) {
+    document.getElementById('editId').value = carrierId;
+    document.getElementById('editType').value = 'carrier';
+    document.getElementById('editName').value = carrierData.name;
+    document.getElementById('editPhone').value = carrierData.phone || '';
+    document.getElementById('editDriverName').value = carrierData.driverName || '';
+    document.getElementById('editTruckNumber').value = carrierData.truckNumber || '';
+
+    modalTitle.textContent = 'Редактирование перевозчика';
+    clientFieldsDiv.classList.add('hidden');
+    carrierFieldsDiv.classList.remove('hidden');
+
+    editModal.classList.remove('hidden');
+};
+
+/**
+ * Close edit modal
+ */
+window.closeEditModal = function () {
+    editModal.classList.add('hidden');
+    editForm.reset();
+};
+
+/**
+ * Handle edit form submission
+ */
+editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('editId').value;
+    const type = document.getElementById('editType').value;
+
+    const data = {
+        name: document.getElementById('editName').value.trim(),
+        phone: document.getElementById('editPhone').value.trim()
+    };
+
+    if (type === 'client') {
+        data.inn = document.getElementById('editInn').value.trim();
+        data.contactPerson = document.getElementById('editContactPerson').value.trim();
+        data.email = document.getElementById('editEmail').value.trim();
+
+        await updateClient(id, data);
+    } else {
+        data.driverName = document.getElementById('editDriverName').value.trim();
+        data.truckNumber = document.getElementById('editTruckNumber').value.trim();
+
+        await updateCarrier(id, data);
+    }
+});
 
 // ============================================
 // ORDERS SECTION
@@ -117,10 +195,7 @@ async function createOrder(orderData) {
         console.log('✅ Заказ успешно создан:', result);
         showMessage('✓ Заказ успешно создан!', 'success');
 
-        // Очистить форму
         orderForm.reset();
-
-        // Обновить список заказов
         loadOrders();
 
         return result;
@@ -157,7 +232,6 @@ async function loadOrders() {
             return;
         }
 
-        // Отобразить заказы
         ordersListDiv.innerHTML = orders.map(order => createOrderCard(order)).join('');
 
     } catch (error) {
@@ -175,12 +249,8 @@ async function loadOrders() {
  */
 function createOrderCard(order) {
     const createdDate = formatDate(order.created_at);
-
-    // Получаем имена клиента и перевозчика
     const clientName = order.client?.name || 'Не указан';
     const carrierName = order.carrier?.name || 'Не указан';
-
-    // Определяем цвет маржи
     const marginColor = order.margin >= 0 ? '#28a745' : '#dc3545';
 
     return `
@@ -237,10 +307,8 @@ function createOrderCard(order) {
 orderForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Получить данные из формы
     const formData = new FormData(orderForm);
 
-    // Формируем объект с правильными ключами для API
     const orderData = {
         route_from: formData.get('route_from').trim(),
         route_to: formData.get('route_to').trim(),
@@ -252,7 +320,6 @@ orderForm.addEventListener('submit', async (e) => {
         carrier_rate: parseFloat(formData.get('carrierRate'))
     };
 
-    // Валидация
     if (!orderData.route_from || !orderData.route_to || !orderData.cargo_name ||
         !orderData.cargo_weight || !orderData.clientName || !orderData.carrierName ||
         isNaN(orderData.client_rate) || isNaN(orderData.carrier_rate)) {
@@ -270,7 +337,6 @@ orderForm.addEventListener('submit', async (e) => {
         return;
     }
 
-    // Отправить данные
     await createOrder(orderData);
 });
 
@@ -283,7 +349,7 @@ orderForm.addEventListener('submit', async (e) => {
  */
 async function loadClients() {
     try {
-        clientsTableBody.innerHTML = '<tr><td colspan="6" class="loading">Загрузка клиентов...</td></tr>';
+        clientsTableBody.innerHTML = '<tr><td colspan="7" class="loading">Загрузка клиентов...</td></tr>';
 
         const response = await fetch(API_CLIENTS);
 
@@ -297,7 +363,7 @@ async function loadClients() {
         if (clients.length === 0) {
             clientsTableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="empty-state">
+                    <td colspan="7" class="empty-state">
                         <div class="empty-state-icon">📭</div>
                         <p>Клиентов пока нет. Они будут созданы автоматически при создании заказов.</p>
                     </td>
@@ -306,7 +372,6 @@ async function loadClients() {
             return;
         }
 
-        // Отобразить клиентов
         clientsTableBody.innerHTML = clients.map(client => `
             <tr>
                 <td>${client.name}</td>
@@ -315,6 +380,16 @@ async function loadClients() {
                 <td>${client.phone || '—'}</td>
                 <td>${client.email || '—'}</td>
                 <td>${formatDate(client.created_at)}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon btn-edit" onclick='openEditClient("${client._id}", ${JSON.stringify(client)})' title="Редактировать">
+                            ✏️
+                        </button>
+                        <button class="btn-icon btn-delete" onclick="deleteClient('${client._id}')" title="Удалить">
+                            🗑️
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('');
 
@@ -322,13 +397,66 @@ async function loadClients() {
         console.error('❌ Ошибка загрузки клиентов:', error);
         clientsTableBody.innerHTML = `
             <tr>
-                <td colspan="6" style="color: var(--error-color); text-align: center;">
+                <td colspan="7" style="color: var(--error-color); text-align: center;">
                     Ошибка при загрузке клиентов
                 </td>
             </tr>
         `;
     }
 }
+
+/**
+ * Update client
+ */
+async function updateClient(id, data) {
+    try {
+        const response = await fetch(`${API_CLIENTS}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка при обновлении клиента');
+        }
+
+        showMessage('✓ Клиент успешно обновлен!', 'success');
+        closeEditModal();
+        loadClients();
+    } catch (error) {
+        console.error('❌ Ошибка обновления клиента:', error);
+        showMessage(`✗ Ошибка: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Delete client
+ */
+window.deleteClient = async function (id) {
+    if (!confirm('Вы уверены, что хотите удалить этого клиента? Это действие нельзя отменить.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_CLIENTS}/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка при удалении клиента');
+        }
+
+        showMessage('✓ Клиент успешно удален!', 'success');
+        loadClients();
+    } catch (error) {
+        console.error('❌ Ошибка удаления клиента:', error);
+        showMessage(`✗ Ошибка: ${error.message}`, 'error');
+    }
+};
 
 // ============================================
 // CARRIERS SECTION
@@ -339,7 +467,7 @@ async function loadClients() {
  */
 async function loadCarriers() {
     try {
-        carriersTableBody.innerHTML = '<tr><td colspan="5" class="loading">Загрузка перевозчиков...</td></tr>';
+        carriersTableBody.innerHTML = '<tr><td colspan="6" class="loading">Загрузка перевозчиков...</td></tr>';
 
         const response = await fetch(API_CARRIERS);
 
@@ -353,7 +481,7 @@ async function loadCarriers() {
         if (carriers.length === 0) {
             carriersTableBody.innerHTML = `
                 <tr>
-                    <td colspan="5" class="empty-state">
+                    <td colspan="6" class="empty-state">
                         <div class="empty-state-icon">📭</div>
                         <p>Перевозчиков пока нет. Они будут созданы автоматически при создании заказов.</p>
                     </td>
@@ -362,7 +490,6 @@ async function loadCarriers() {
             return;
         }
 
-        // Отобразить перевозчиков
         carriersTableBody.innerHTML = carriers.map(carrier => `
             <tr>
                 <td>${carrier.name}</td>
@@ -370,6 +497,16 @@ async function loadCarriers() {
                 <td>${carrier.truckNumber || '—'}</td>
                 <td>${carrier.phone || '—'}</td>
                 <td>${formatDate(carrier.created_at)}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon btn-edit" onclick='openEditCarrier("${carrier._id}", ${JSON.stringify(carrier)})' title="Редактировать">
+                            ✏️
+                        </button>
+                        <button class="btn-icon btn-delete" onclick="deleteCarrier('${carrier._id}')" title="Удалить">
+                            🗑️
+                        </button>
+                    </div>
+                </td>
             </tr>
         `).join('');
 
@@ -377,13 +514,66 @@ async function loadCarriers() {
         console.error('❌ Ошибка загрузки перевозчиков:', error);
         carriersTableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="color: var(--error-color); text-align: center;">
+                <td colspan="6" style="color: var(--error-color); text-align: center;">
                     Ошибка при загрузке перевозчиков
                 </td>
             </tr>
         `;
     }
 }
+
+/**
+ * Update carrier
+ */
+async function updateCarrier(id, data) {
+    try {
+        const response = await fetch(`${API_CARRIERS}/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка при обновлении перевозчика');
+        }
+
+        showMessage('✓ Перевозчик успешно обновлен!', 'success');
+        closeEditModal();
+        loadCarriers();
+    } catch (error) {
+        console.error('❌ Ошибка обновления перевозчика:', error);
+        showMessage(`✗ Ошибка: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * Delete carrier
+ */
+window.deleteCarrier = async function (id) {
+    if (!confirm('Вы уверены, что хотите удалить этого перевозчика? Это действие нельзя отменить.')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_CARRIERS}/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка при удалении перевозчика');
+        }
+
+        showMessage('✓ Перевозчик успешно удален!', 'success');
+        loadCarriers();
+    } catch (error) {
+        console.error('❌ Ошибка удаления перевозчика:', error);
+        showMessage(`✗ Ошибка: ${error.message}`, 'error');
+    }
+};
 
 // ============================================
 // INITIALIZATION
@@ -395,14 +585,10 @@ async function loadCarriers() {
 function init() {
     console.log('🚀 STL Intermodal CRM загружен');
 
-    // Initialize navigation
     initNavigation();
-
-    // Load all data
     loadOrders();
     loadClients();
     loadCarriers();
 }
 
-// Запустить приложение при загрузке страницы
 document.addEventListener('DOMContentLoaded', init);

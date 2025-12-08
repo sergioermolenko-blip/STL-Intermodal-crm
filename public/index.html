@@ -135,11 +135,12 @@
                                     <th>Телефон</th>
                                     <th>Email</th>
                                     <th>Дата создания</th>
+                                    <th>Действия</th>
                                 </tr>
                             </thead>
                             <tbody id="clientsTableBody">
                                 <tr>
-                                    <td colspan="6" class="loading">Загрузка клиентов...</td>
+                                    <td colspan="7" class="loading">Загрузка клиентов...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -164,11 +165,12 @@
                                     <th>Номер грузовика</th>
                                     <th>Телефон</th>
                                     <th>Дата создания</th>
+                                    <th>Действия</th>
                                 </tr>
                             </thead>
                             <tbody id="carriersTableBody">
                                 <tr>
-                                    <td colspan="5" class="loading">Загрузка перевозчиков...</td>
+                                    <td colspan="6" class="loading">Загрузка перевозчиков...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -176,6 +178,64 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- Universal Edit Modal -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Редактирование</h2>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            <form id="editForm" class="modal-form">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editType">
+
+                <div class="form-group">
+                    <label for="editName">Название *</label>
+                    <input type="text" id="editName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editPhone">Телефон</label>
+                    <input type="text" id="editPhone">
+                </div>
+
+                <!-- Client-specific fields -->
+                <div id="clientFields" class="hidden">
+                    <div class="form-group">
+                        <label for="editInn">ИНН</label>
+                        <input type="text" id="editInn">
+                    </div>
+                    <div class="form-group">
+                        <label for="editContactPerson">Контактное лицо</label>
+                        <input type="text" id="editContactPerson">
+                    </div>
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail">
+                    </div>
+                </div>
+
+                <!-- Carrier-specific fields -->
+                <div id="carrierFields" class="hidden">
+                    <div class="form-group">
+                        <label for="editDriverName">Водитель</label>
+                        <input type="text" id="editDriverName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editTruckNumber">Номер грузовика</label>
+                        <input type="text" id="editTruckNumber">
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="/js/app.js" type="module"></script>
