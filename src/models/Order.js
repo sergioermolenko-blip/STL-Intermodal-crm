@@ -1,41 +1,32 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    // Маршрут
-    origin: {
-        type: String,
-        required: [true, 'Пункт отправления обязателен']
+    // Связь с Клиентом
+    client: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Client',
+        required: true
     },
-    destination: {
-        type: String,
-        required: [true, 'Пункт назначения обязателен']
+    // Связь с Перевозчиком
+    carrier: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Carrier',
+        required: true
     },
+    // Данные о грузе
+    route_from: { type: String, required: true },
+    route_to: { type: String, required: true },
+    cargo_name: { type: String, required: true },
+    cargo_weight: { type: Number, required: true },
 
-    // Груз
-    cargo: {
-        type: String,
-        required: [true, 'Наименование груза обязательно']
-    },
-    weight: {
-        type: Number,
-        required: [true, 'Вес груза обязателен'],
-        min: [0, 'Вес не может быть отрицательным']
-    },
+    // Финансы
+    client_rate: { type: Number, required: true }, // Ставка Клиента
+    carrier_rate: { type: Number, required: true }, // Ставка Перевозчика
+    margin: { type: Number }, // Маржа
 
-    // Дополнительная информация
-    notes: {
-        type: String,
-        default: ''
-    },
-
-    // Статус заказа
-    status: {
-        type: String,
-        enum: ['Новый', 'В обработке', 'В пути', 'Доставлен', 'Отменён'],
-        default: 'Новый'
-    }
-}, {
-    timestamps: true // Автоматически добавит createdAt и updatedAt
+    // Системные поля
+    status: { type: String, default: 'new' },
+    created_at: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Order', orderSchema);

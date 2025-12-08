@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STL Intermodal CRM - Система управления заказами</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
     <div class="container">
         <header class="header">
@@ -17,64 +19,66 @@
             <!-- Форма создания заказа -->
             <section class="card">
                 <h2>📦 Создание нового заказа</h2>
-                
+
                 <form id="orderForm" class="order-form">
-                    <div class="form-group">
-                        <label for="origin">Откуда (пункт отправления)</label>
-                        <input 
-                            type="text" 
-                            id="origin" 
-                            name="origin" 
-                            placeholder="Например: Москва, Россия" 
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="destination">Куда (пункт назначения)</label>
-                        <input 
-                            type="text" 
-                            id="destination" 
-                            name="destination" 
-                            placeholder="Например: Санкт-Петербург, Россия" 
-                            required
-                        >
-                    </div>
-
+                    <!-- Маршрут -->
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="cargo">Наименование груза</label>
-                            <input 
-                                type="text" 
-                                id="cargo" 
-                                name="cargo" 
-                                placeholder="Например: Электроника" 
-                                required
-                            >
+                            <label for="route_from">Откуда (пункт отправления)</label>
+                            <input type="text" id="route_from" name="route_from" placeholder="Например: Москва"
+                                required>
                         </div>
 
                         <div class="form-group">
-                            <label for="weight">Вес (кг)</label>
-                            <input 
-                                type="number" 
-                                id="weight" 
-                                name="weight" 
-                                placeholder="1000" 
-                                min="0" 
-                                step="0.01"
-                                required
-                            >
+                            <label for="route_to">Куда (пункт назначения)</label>
+                            <input type="text" id="route_to" name="route_to" placeholder="Например: Санкт-Петербург"
+                                required>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="notes">Дополнительная информация (необязательно)</label>
-                        <textarea 
-                            id="notes" 
-                            name="notes" 
-                            rows="3" 
-                            placeholder="Особые требования к перевозке, упаковке и т.д."
-                        ></textarea>
+                    <!-- Груз -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cargo_name">Наименование груза</label>
+                            <input type="text" id="cargo_name" name="cargo_name" placeholder="Например: Электроника"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cargo_weight">Вес (кг)</label>
+                            <input type="number" id="cargo_weight" name="cargo_weight" placeholder="1000" min="0"
+                                step="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Участники -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientName">Клиент</label>
+                            <input type="text" id="clientName" name="clientName" placeholder="Например: ООО Ромашка"
+                                required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="carrierName">Перевозчик</label>
+                            <input type="text" id="carrierName" name="carrierName" placeholder="Например: ИП Транспорт"
+                                required>
+                        </div>
+                    </div>
+
+                    <!-- Финансы -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="clientRate">Ставка клиента (₽)</label>
+                            <input type="number" id="clientRate" name="clientRate" placeholder="50000" min="0"
+                                step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="carrierRate">Ставка перевозчика (₽)</label>
+                            <input type="number" id="carrierRate" name="carrierRate" placeholder="40000" min="0"
+                                step="0.01" required>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary">
@@ -98,4 +102,5 @@
 
     <script src="/js/app.js" type="module"></script>
 </body>
+
 </html>
