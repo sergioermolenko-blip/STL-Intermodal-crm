@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const carrierController = require('../controllers/carrierController');
 
+// POST /api/carriers - Создать нового перевозчика
+router.post('/', carrierController.create);
+
 // GET /api/carriers - Получить всех перевозчиков
 router.get('/', carrierController.getAll);
 

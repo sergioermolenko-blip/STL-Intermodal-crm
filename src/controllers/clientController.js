@@ -1,6 +1,38 @@
 const Client = require('../models/Client');
 const Order = require('../models/Order');
 
+// Создать нового клиента
+exports.create = async (req, res) => {
+    try {
+        const { name, inn, contactPerson, phone, email } = req.body;
+
+        // Проверка обязательных полей
+        if (!name || !name.trim()) {
+            return res.status(400).json({ message: 'Название клиента обязательно' });
+        }
+
+        // Проверка на дубликат имени
+        const existingClient = await Client.findOne({ name: name.trim() });
+
+        if (existingClient) {
+            return res.status(400).json({ message: 'Клиент с таким названием уже существует' });
+        }
+
+        const newClient = await Client.create({
+            name: name.trim(),
+            inn: inn?.trim() || '',
+            contactPerson: contactPerson?.trim() || '',
+            phone: phone?.trim() || '',
+            email: email?.trim() || ''
+        });
+
+        console.log(`✅ Создан новый клиент: ${newClient.name}`);
+        res.status(201).json(newClient);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
 // Получить всех клиентов
 exports.getAll = async (req, res) => {
     try {

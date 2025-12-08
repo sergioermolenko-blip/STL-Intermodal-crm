@@ -1,6 +1,37 @@
 const Carrier = require('../models/Carrier');
 const Order = require('../models/Order');
 
+// Создать нового перевозчика
+exports.create = async (req, res) => {
+    try {
+        const { name, driverName, truckNumber, phone } = req.body;
+
+        // Проверка обязательных полей
+        if (!name || !name.trim()) {
+            return res.status(400).json({ message: 'Название перевозчика обязательно' });
+        }
+
+        // Проверка на дубликат имени
+        const existingCarrier = await Carrier.findOne({ name: name.trim() });
+
+        if (existingCarrier) {
+            return res.status(400).json({ message: 'Перевозчик с таким названием уже существует' });
+        }
+
+        const newCarrier = await Carrier.create({
+            name: name.trim(),
+            driverName: driverName?.trim() || '',
+            truckNumber: truckNumber?.trim() || '',
+            phone: phone?.trim() || ''
+        });
+
+        console.log(`✅ Создан новый перевозчик: ${newCarrier.name}`);
+        res.status(201).json(newCarrier);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
+
 // Получить всех перевозчиков
 exports.getAll = async (req, res) => {
     try {

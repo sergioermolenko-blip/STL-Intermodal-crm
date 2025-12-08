@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const clientController = require('../controllers/clientController');
 
+// POST /api/clients - Создать нового клиента
+router.post('/', clientController.create);
+
 // GET /api/clients - Получить всех клиентов
 router.get('/', clientController.getAll);
 

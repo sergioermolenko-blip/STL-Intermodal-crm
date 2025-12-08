@@ -139,6 +139,36 @@ window.closeEditModal = function () {
 };
 
 /**
+ * Open modal for adding new client
+ */
+window.openAddClient = function () {
+    editForm.reset();
+    document.getElementById('editId').value = '';
+    document.getElementById('editType').value = 'client';
+
+    modalTitle.textContent = 'Новый клиент';
+    clientFieldsDiv.classList.remove('hidden');
+    carrierFieldsDiv.classList.add('hidden');
+
+    editModal.classList.remove('hidden');
+};
+
+/**
+ * Open modal for adding new carrier
+ */
+window.openAddCarrier = function () {
+    editForm.reset();
+    document.getElementById('editId').value = '';
+    document.getElementById('editType').value = 'carrier';
+
+    modalTitle.textContent = 'Новый перевозчик';
+    clientFieldsDiv.classList.add('hidden');
+    carrierFieldsDiv.classList.remove('hidden');
+
+    editModal.classList.remove('hidden');
+};
+
+/**
  * Handle edit form submission
  */
 editForm.addEventListener('submit', async (e) => {
@@ -157,12 +187,12 @@ editForm.addEventListener('submit', async (e) => {
         data.contactPerson = document.getElementById('editContactPerson').value.trim();
         data.email = document.getElementById('editEmail').value.trim();
 
-        await updateClient(id, data);
+        if (id) { await updateClient(id, data); } else { await createClient(data); }
     } else {
         data.driverName = document.getElementById('editDriverName').value.trim();
         data.truckNumber = document.getElementById('editTruckNumber').value.trim();
 
-        await updateCarrier(id, data);
+        if (id) { await updateCarrier(id, data); } else { await createCarrier(data); }
     }
 });
 
@@ -406,6 +436,33 @@ async function loadClients() {
 }
 
 /**
+ * Create new client
+ */
+async function createClient(data) {
+    try {
+        const response = await fetch(API_CLIENTS, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка при создании клиента');
+        }
+
+        showMessage('✓ Клиент успешно создан!', 'success');
+        closeEditModal();
+        loadClients();
+    } catch (error) {
+        console.error('❌ Ошибка создания клиента:', error);
+        showMessage(`✗ Ошибка: ${error.message}`, 'error');
+    }
+}
+
+/**
  * Update client
  */
 async function updateClient(id, data) {
@@ -523,6 +580,33 @@ async function loadCarriers() {
 }
 
 /**
+ * Create new carrier
+ */
+async function createCarrier(data) {
+    try {
+        const response = await fetch(API_CARRIERS, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Ошибка при создании перевозчика');
+        }
+
+        showMessage('✓ Перевозчик успешно создан!', 'success');
+        closeEditModal();
+        loadCarriers();
+    } catch (error) {
+        console.error('❌ Ошибка создания перевозчика:', error);
+        showMessage(`✗ Ошибка: ${error.message}`, 'error');
+    }
+}
+
+/**
  * Update carrier
  */
 async function updateCarrier(id, data) {
@@ -592,3 +676,5 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+
