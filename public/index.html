@@ -9,92 +9,170 @@
 </head>
 
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>🚚 STL Intermodal CRM</h1>
-            <p class="subtitle">Система управления экспедиторскими заказами</p>
-        </header>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚚 STL CRM</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-section="orders">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Заказы</span>
+                </button>
+                <button class="nav-btn" data-section="clients">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">Клиенты</span>
+                </button>
+                <button class="nav-btn" data-section="carriers">
+                    <span class="nav-icon">🚛</span>
+                    <span class="nav-text">Перевозчики</span>
+                </button>
+            </nav>
+        </aside>
 
+        <!-- Main Content -->
         <main class="main-content">
-            <!-- Форма создания заказа -->
-            <section class="card">
-                <h2>📦 Создание нового заказа</h2>
+            <!-- Orders Section -->
+            <section id="orders-section" class="content-section">
+                <header class="section-header">
+                    <h1>📦 Управление заказами</h1>
+                    <p class="section-subtitle">Создание и просмотр заказов на перевозку</p>
+                </header>
 
-                <form id="orderForm" class="order-form">
-                    <!-- Маршрут -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="route_from">Откуда (пункт отправления)</label>
-                            <input type="text" id="route_from" name="route_from" placeholder="Например: Москва"
-                                required>
+                <!-- Order Form -->
+                <div class="card">
+                    <h2>Создание нового заказа</h2>
+
+                    <form id="orderForm" class="order-form">
+                        <!-- Маршрут -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="route_from">Откуда (пункт отправления)</label>
+                                <input type="text" id="route_from" name="route_from" placeholder="Например: Москва"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="route_to">Куда (пункт назначения)</label>
+                                <input type="text" id="route_to" name="route_to" placeholder="Например: Санкт-Петербург"
+                                    required>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="route_to">Куда (пункт назначения)</label>
-                            <input type="text" id="route_to" name="route_to" placeholder="Например: Санкт-Петербург"
-                                required>
+                        <!-- Груз -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="cargo_name">Наименование груза</label>
+                                <input type="text" id="cargo_name" name="cargo_name" placeholder="Например: Электроника"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cargo_weight">Вес (кг)</label>
+                                <input type="number" id="cargo_weight" name="cargo_weight" placeholder="1000" min="0"
+                                    step="0.01" required>
+                            </div>
                         </div>
+
+                        <!-- Участники -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="clientName">Клиент</label>
+                                <input type="text" id="clientName" name="clientName" placeholder="Например: ООО Ромашка"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label for="carrierName">Перевозчик</label>
+                                <input type="text" id="carrierName" name="carrierName"
+                                    placeholder="Например: ИП Транспорт" required>
+                            </div>
+                        </div>
+
+                        <!-- Финансы -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="clientRate">Ставка клиента (₽)</label>
+                                <input type="number" id="clientRate" name="clientRate" placeholder="50000" min="0"
+                                    step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="carrierRate">Ставка перевозчика (₽)</label>
+                                <input type="number" id="carrierRate" name="carrierRate" placeholder="40000" min="0"
+                                    step="0.01" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">✓ Создать заказ</button>
+                    </form>
+                </div>
+
+                <!-- Message -->
+                <div id="message" class="message hidden"></div>
+
+                <!-- Orders List -->
+                <div class="card">
+                    <h2>Список заказов</h2>
+                    <div id="ordersList" class="orders-list">
+                        <p class="loading">Загрузка заказов...</p>
                     </div>
-
-                    <!-- Груз -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="cargo_name">Наименование груза</label>
-                            <input type="text" id="cargo_name" name="cargo_name" placeholder="Например: Электроника"
-                                required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="cargo_weight">Вес (кг)</label>
-                            <input type="number" id="cargo_weight" name="cargo_weight" placeholder="1000" min="0"
-                                step="0.01" required>
-                        </div>
-                    </div>
-
-                    <!-- Участники -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="clientName">Клиент</label>
-                            <input type="text" id="clientName" name="clientName" placeholder="Например: ООО Ромашка"
-                                required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="carrierName">Перевозчик</label>
-                            <input type="text" id="carrierName" name="carrierName" placeholder="Например: ИП Транспорт"
-                                required>
-                        </div>
-                    </div>
-
-                    <!-- Финансы -->
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="clientRate">Ставка клиента (₽)</label>
-                            <input type="number" id="clientRate" name="clientRate" placeholder="50000" min="0"
-                                step="0.01" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="carrierRate">Ставка перевозчика (₽)</label>
-                            <input type="number" id="carrierRate" name="carrierRate" placeholder="40000" min="0"
-                                step="0.01" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">
-                        ✓ Создать заказ
-                    </button>
-                </form>
+                </div>
             </section>
 
-            <!-- Сообщение об успехе/ошибке -->
-            <div id="message" class="message hidden"></div>
+            <!-- Clients Section -->
+            <section id="clients-section" class="content-section hidden">
+                <header class="section-header">
+                    <h1>👥 Справочник клиентов</h1>
+                    <p class="section-subtitle">Управление базой клиентов</p>
+                </header>
 
-            <!-- Список заказов -->
-            <section class="card">
-                <h2>📋 Список заказов</h2>
-                <div id="ordersList" class="orders-list">
-                    <p class="loading">Загрузка заказов...</p>
+                <div class="card">
+                    <div class="table-container">
+                        <table id="clientsTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>ИНН</th>
+                                    <th>Контактное лицо</th>
+                                    <th>Телефон</th>
+                                    <th>Email</th>
+                                    <th>Дата создания</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsTableBody">
+                                <tr>
+                                    <td colspan="6" class="loading">Загрузка клиентов...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Carriers Section -->
+            <section id="carriers-section" class="content-section hidden">
+                <header class="section-header">
+                    <h1>🚛 Справочник перевозчиков</h1>
+                    <p class="section-subtitle">Управление базой перевозчиков</p>
+                </header>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table id="carriersTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Водитель</th>
+                                    <th>Номер грузовика</th>
+                                    <th>Телефон</th>
+                                    <th>Дата создания</th>
+                                </tr>
+                            </thead>
+                            <tbody id="carriersTableBody">
+                                <tr>
+                                    <td colspan="5" class="loading">Загрузка перевозчиков...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
         </main>

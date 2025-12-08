@@ -1,16 +1,59 @@
 // Главный файл приложения
-// API базовый URL
-const API_URL = '/api/orders';
+// API URLs
+const API_ORDERS = '/api/orders';
+const API_CLIENTS = '/api/clients';
+const API_CARRIERS = '/api/carriers';
 
 // Элементы DOM
 const orderForm = document.getElementById('orderForm');
 const messageDiv = document.getElementById('message');
 const ordersListDiv = document.getElementById('ordersList');
+const clientsTableBody = document.getElementById('clientsTableBody');
+const carriersTableBody = document.getElementById('carriersTableBody');
+
+// Navigation elements
+const navButtons = document.querySelectorAll('.nav-btn');
+const sections = document.querySelectorAll('.content-section');
+
+/**
+ * Navigation - Switch between sections
+ */
+function switchSection(sectionId) {
+    // Hide all sections
+    sections.forEach(section => section.classList.add('hidden'));
+
+    // Remove active class from all nav buttons
+    navButtons.forEach(btn => btn.classList.remove('active'));
+
+    // Show selected section
+    const targetSection = document.getElementById(`${sectionId}-section`);
+    if (targetSection) {
+        targetSection.classList.remove('hidden');
+    }
+
+    // Add active class to clicked button
+    const activeButton = document.querySelector(`[data-section="${sectionId}"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+
+    console.log(`📍 Переключено на секцию: ${sectionId}`);
+}
+
+/**
+ * Initialize navigation
+ */
+function initNavigation() {
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const sectionId = button.dataset.section;
+            switchSection(sectionId);
+        });
+    });
+}
 
 /**
  * Показать сообщение пользователю
- * @param {string} text - Текст сообщения
- * @param {string} type - Тип сообщения ('success' или 'error')
  */
 function showMessage(text, type = 'success') {
     messageDiv.textContent = text;
@@ -24,8 +67,6 @@ function showMessage(text, type = 'success') {
 
 /**
  * Форматирование валюты
- * @param {number} amount - Сумма
- * @returns {string} Отформатированная строка
  */
 function formatCurrency(amount) {
     return new Intl.NumberFormat('ru-RU', {
@@ -37,14 +78,28 @@ function formatCurrency(amount) {
 }
 
 /**
+ * Форматирование даты
+ */
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+}
+
+// ============================================
+// ORDERS SECTION
+// ============================================
+
+/**
  * Создать новый заказ
- * @param {Object} orderData - Данные заказа
  */
 async function createOrder(orderData) {
     try {
         console.log('📤 Отправка данных заказа:', orderData);
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(API_ORDERS, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -83,7 +138,7 @@ async function loadOrders() {
     try {
         ordersListDiv.innerHTML = '<p class="loading">Загрузка заказов...</p>';
 
-        const response = await fetch(API_URL);
+        const response = await fetch(API_ORDERS);
 
         if (!response.ok) {
             throw new Error('Ошибка при загрузке заказов');
@@ -117,19 +172,11 @@ async function loadOrders() {
 
 /**
  * Создать HTML-карточку заказа
- * @param {Object} order - Объект заказа
- * @returns {string} HTML-строка
  */
 function createOrderCard(order) {
-    const createdDate = new Date(order.created_at).toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    const createdDate = formatDate(order.created_at);
 
-    // Получаем имена клиента и перевозчика (они приходят как объекты с populate)
+    // Получаем имена клиента и перевозчика
     const clientName = order.client?.name || 'Не указан';
     const carrierName = order.carrier?.name || 'Не указан';
 
@@ -185,7 +232,7 @@ function createOrderCard(order) {
 }
 
 /**
- * Обработчик отправки формы
+ * Обработчик отправки формы заказа
  */
 orderForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -227,12 +274,134 @@ orderForm.addEventListener('submit', async (e) => {
     await createOrder(orderData);
 });
 
+// ============================================
+// CLIENTS SECTION
+// ============================================
+
+/**
+ * Загрузить список клиентов
+ */
+async function loadClients() {
+    try {
+        clientsTableBody.innerHTML = '<tr><td colspan="6" class="loading">Загрузка клиентов...</td></tr>';
+
+        const response = await fetch(API_CLIENTS);
+
+        if (!response.ok) {
+            throw new Error('Ошибка при загрузке клиентов');
+        }
+
+        const clients = await response.json();
+        console.log('👥 Загружено клиентов:', clients.length);
+
+        if (clients.length === 0) {
+            clientsTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Клиентов пока нет. Они будут созданы автоматически при создании заказов.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Отобразить клиентов
+        clientsTableBody.innerHTML = clients.map(client => `
+            <tr>
+                <td>${client.name}</td>
+                <td>${client.inn || '—'}</td>
+                <td>${client.contactPerson || '—'}</td>
+                <td>${client.phone || '—'}</td>
+                <td>${client.email || '—'}</td>
+                <td>${formatDate(client.created_at)}</td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        console.error('❌ Ошибка загрузки клиентов:', error);
+        clientsTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" style="color: var(--error-color); text-align: center;">
+                    Ошибка при загрузке клиентов
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// ============================================
+// CARRIERS SECTION
+// ============================================
+
+/**
+ * Загрузить список перевозчиков
+ */
+async function loadCarriers() {
+    try {
+        carriersTableBody.innerHTML = '<tr><td colspan="5" class="loading">Загрузка перевозчиков...</td></tr>';
+
+        const response = await fetch(API_CARRIERS);
+
+        if (!response.ok) {
+            throw new Error('Ошибка при загрузке перевозчиков');
+        }
+
+        const carriers = await response.json();
+        console.log('🚛 Загружено перевозчиков:', carriers.length);
+
+        if (carriers.length === 0) {
+            carriersTableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Перевозчиков пока нет. Они будут созданы автоматически при создании заказов.</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        // Отобразить перевозчиков
+        carriersTableBody.innerHTML = carriers.map(carrier => `
+            <tr>
+                <td>${carrier.name}</td>
+                <td>${carrier.driverName || '—'}</td>
+                <td>${carrier.truckNumber || '—'}</td>
+                <td>${carrier.phone || '—'}</td>
+                <td>${formatDate(carrier.created_at)}</td>
+            </tr>
+        `).join('');
+
+    } catch (error) {
+        console.error('❌ Ошибка загрузки перевозчиков:', error);
+        carriersTableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="color: var(--error-color); text-align: center;">
+                    Ошибка при загрузке перевозчиков
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
 /**
  * Инициализация приложения
  */
 function init() {
     console.log('🚀 STL Intermodal CRM загружен');
+
+    // Initialize navigation
+    initNavigation();
+
+    // Load all data
     loadOrders();
+    loadClients();
+    loadCarriers();
 }
 
 // Запустить приложение при загрузке страницы
