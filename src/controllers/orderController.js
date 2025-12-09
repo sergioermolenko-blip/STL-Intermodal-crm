@@ -22,6 +22,7 @@ exports.createOrder = async (req, res) => {
             clientName, carrierName,
             client_rate, carrier_rate,
             route_from, route_to, cargo_name, cargo_weight,
+            vehicleBodyType,
             date_loading, date_unloading
         } = req.body;
 
@@ -54,6 +55,7 @@ exports.createOrder = async (req, res) => {
             route_to,
             cargo_name,
             cargo_weight,
+            vehicleBodyType,
             date_loading,
             date_unloading,
             client_rate: Number(client_rate),
@@ -76,6 +78,23 @@ exports.createOrder = async (req, res) => {
     }
 };
 
+// Получить заказ по ID
+exports.getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id)
+            .populate('client', 'name')
+            .populate('carrier', 'name');
+
+        if (!order) {
+            return res.status(404).json({ message: 'Заказ не найден' });
+        }
+
+        res.json(order);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
 // Обновить заказ
 exports.updateOrder = async (req, res) => {
     try {
@@ -84,6 +103,7 @@ exports.updateOrder = async (req, res) => {
             clientName, carrierName,
             client_rate, carrier_rate,
             route_from, route_to, cargo_name, cargo_weight,
+            vehicleBodyType,
             date_loading, date_unloading
         } = req.body;
 
@@ -127,6 +147,7 @@ exports.updateOrder = async (req, res) => {
         order.route_to = route_to || order.route_to;
         order.cargo_name = cargo_name || order.cargo_name;
         order.cargo_weight = cargo_weight !== undefined ? cargo_weight : order.cargo_weight;
+        order.vehicleBodyType = vehicleBodyType || order.vehicleBodyType;
         order.date_loading = date_loading || order.date_loading;
         order.date_unloading = date_unloading || order.date_unloading;
         order.client_rate = newClientRate;

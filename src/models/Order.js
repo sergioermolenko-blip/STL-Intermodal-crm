@@ -18,6 +18,11 @@ const orderSchema = new mongoose.Schema({
     route_to: { type: String, required: true },
     cargo_name: { type: String, required: true },
     cargo_weight: { type: Number, required: true },
+    vehicleBodyType: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'VehicleBodyType',
+        required: true
+    },
 
     // Даты
     date_loading: { type: Date, required: true },
