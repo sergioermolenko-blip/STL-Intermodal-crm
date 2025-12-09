@@ -14,48 +14,51 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
         `<option value="${carrier._id}">${carrier.name}</option>`
     ).join('');
 
-    // 4. Возвращаем HTML формы
+    // 4. Возвращаем HTML формы с Grid Layout
     return `
         <form id="createOrderForm" class="order-form">
             <div class="form-grid-layout">
                 
+                <!-- Блок 1: Маршрут и Даты -->
                 <div class="form-section">
-                    <h3>📍 Маршрут и Даты</h3>
+                    <h3 class="section-title">📍 Маршрут и Даты</h3>
                     
-                    <div class="form-group">
-                        <label>Откуда</label>
-                        <input type="text" name="routeFrom" id="route_from" placeholder="Город отправления" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Куда</label>
-                        <input type="text" name="routeTo" id="route_to" placeholder="Город назначения" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Откуда</label>
+                            <input type="text" name="route_from" id="route_from" placeholder="Город отправления" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Куда</label>
+                            <input type="text" name="route_to" id="route_to" placeholder="Город назначения" required>
+                        </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Дата погрузки</label>
-                            <input type="date" name="dateLoading" id="date_loading" required>
+                            <input type="date" name="date_loading" id="date_loading" required>
                         </div>
                         <div class="form-group">
                             <label>Дата выгрузки</label>
-                            <input type="date" name="dateUnloading" id="date_unloading">
+                            <input type="date" name="date_unloading" id="date_unloading">
                         </div>
                     </div>
                 </div>
 
+                <!-- Блок 2: Груз и Транспорт -->
                 <div class="form-section">
-                    <h3>🚛 Груз и Транспорт</h3>
+                    <h3 class="section-title">🚛 Груз и Транспорт</h3>
 
                     <div class="form-group">
                         <label>Характер груза</label>
-                        <input type="text" name="cargoName" id="cargo_name" placeholder="Например: Доски" required>
+                        <input type="text" name="cargo_name" id="cargo_name" placeholder="Например: Доски" required>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Вес (кг)</label>
-                            <input type="number" name="cargoWeight" id="cargo_weight" placeholder="20000" required>
+                            <input type="number" name="cargo_weight" id="cargo_weight" placeholder="20000" required>
                         </div>
                         <div class="form-group">
                             <label>Тип кузова</label>
@@ -67,8 +70,9 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                     </div>
                 </div>
 
-                <div class="form-section full-width">
-                    <h3>💰 Участники и Деньги</h3>
+                <!-- Блок 3: Финансы -->
+                <div class="form-section">
+                    <h3 class="section-title">💰 Финансы</h3>
                     
                     <div class="form-row">
                         <div class="form-group">

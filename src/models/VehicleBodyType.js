@@ -12,7 +12,7 @@ const vehicleBodyTypeSchema = new mongoose.Schema({
     description: {
         type: String
     },
-    created_at: {
+    createdAt: {
         type: Date,
         default: Date.now
     }

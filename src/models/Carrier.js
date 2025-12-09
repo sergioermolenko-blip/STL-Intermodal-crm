@@ -9,7 +9,7 @@ const carrierSchema = new mongoose.Schema({
     driverName: { type: String },
     truckNumber: { type: String },
     phone: { type: String },
-    created_at: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Carrier', carrierSchema);

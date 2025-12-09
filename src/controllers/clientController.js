@@ -26,7 +26,6 @@ exports.create = async (req, res) => {
             email: email?.trim() || ''
         });
 
-        console.log(`✅ Создан новый клиент: ${newClient.name}`);
         res.status(201).json(newClient);
     } catch (err) {
         res.status(400).json({ message: err.message });

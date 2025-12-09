@@ -168,35 +168,19 @@ function getOrderFormHTML(order) {
 
 async function init() {
     console.log('🚀 STL Intermodal CRM - Инициализация...');
-    console.log('📍 Скрипт app.js запущен и выполняется!');
 
-    // 1. КРИТИЧЕСКИ ВАЖНО: Загружаем ВСЕ данные СНАЧАЛА
     await loadDictionaries();
-    await loadClients();   // Заполняет clientsData
-    await loadCarriers();  // Заполняет carriersData
+    await loadClients();
+    await loadCarriers();
 
-    // 2. ТОЛЬКО ПОСЛЕ загрузки данных отрисовываем форму
     const orderFormContainer = document.getElementById('orderFormContainer');
     if (orderFormContainer) {
-        // Передаем ВСЕ три аргумента: vehicleBodyTypes, clientsData, carriersData
         orderFormContainer.innerHTML = renderOrderForm(vehicleBodyTypes, clientsData, carriersData);
-        console.log('✅ Форма заказа отрисована с данными:', {
-            vehicleBodyTypes: vehicleBodyTypes.length,
-            clients: clientsData.length,
-            carriers: carriersData.length
-        });
     }
 
-    // 3. Настраиваем навигацию
     setupNavigation();
-
-    // 4. Настраиваем обработчики событий
     setupEventListeners();
-
-    // 5. Загружаем таблицу заказов
     loadOrders();
-
-    console.log('✅ Инициализация завершена');
 }
 
 // ============================================
@@ -210,8 +194,6 @@ async function loadDictionaries() {
 
         const data = await response.json();
         vehicleBodyTypes = data.vehicleBodyTypes || [];
-
-        console.log(`✅ Загружено типов кузова: ${vehicleBodyTypes.length}`);
     } catch (error) {
         console.error('❌ Ошибка загрузки справочников:', error);
     }
@@ -248,8 +230,6 @@ function setupNavigation() {
 // ============================================
 
 function setupEventListeners() {
-    // 1. Таблицы справочников (Слушаем клики на уровне tbody)
-    // Мы явно передаем тип ('client' или 'carrier') в обработчик, это надежнее, чем data-type в HTML
     const clientsTableBody = document.getElementById('clientsTableBody');
     const carriersTableBody = document.getElementById('carriersTableBody');
 
@@ -260,21 +240,17 @@ function setupEventListeners() {
         carriersTableBody.addEventListener('click', (e) => handleTableClick(e, 'carrier'));
     }
 
-    // 2. Таблица заказов
     const ordersList = document.getElementById('ordersList');
     if (ordersList) {
         ordersList.addEventListener('click', handleOrderClick);
     }
 
-    // 3. Кнопки "Добавить" (Статические элементы)
     const btnAddClient = document.getElementById('btnAddClient');
     const btnAddCarrier = document.getElementById('btnAddCarrier');
 
     if (btnAddClient) btnAddClient.addEventListener('click', () => openClientModal(null));
     if (btnAddCarrier) btnAddCarrier.addEventListener('click', () => openCarrierModal(null));
 
-    // 4. Форма создания заказа
-    // Ищем форму по обоим возможным ID для надежности (на случай изменений во View)
     const orderForm = document.getElementById('createOrderForm') || document.getElementById('orderForm');
     if (orderForm) {
         orderForm.addEventListener('submit', createOrder);
@@ -283,18 +259,14 @@ function setupEventListeners() {
 
 /**
  * Универсальный обработчик кликов для таблиц справочников
- * @param {Event} event - Событие клика
- * @param {string} type - Тип сущности ('client' или 'carrier'), переданный при навешивании слушателя
  */
 function handleTableClick(event, type) {
-    // Ищем ближайшую кнопку (поддержка клика по иконке внутри кнопки)
     const btn = event.target.closest('button');
     if (!btn) return;
 
     const id = btn.dataset.id;
-    if (!id) return; // Если у кнопки нет ID, мы не знаем, с чем работать
+    if (!id) return;
 
-    // Маршрутизация действий в зависимости от класса кнопки
     if (btn.classList.contains('btn-delete')) {
         deleteItem(type, id);
     } else if (btn.classList.contains('btn-edit')) {
@@ -430,7 +402,8 @@ async function loadClients() {
 
         clients.forEach(client => {
             const tr = document.createElement('tr');
-            const createdAt = client.createdAt ? new Date(client.createdAt).toLocaleDateString('ru-RU') : '-';
+            const createdDate = client.createdAt || client.created_at;
+            const createdAt = createdDate ? new Date(createdDate).toLocaleDateString('ru-RU') : '-';
 
             tr.innerHTML = `
                 <td>${client.name || '-'}</td>
@@ -473,7 +446,8 @@ async function loadCarriers() {
 
         carriers.forEach(carrier => {
             const tr = document.createElement('tr');
-            const createdAt = carrier.createdAt ? new Date(carrier.createdAt).toLocaleDateString('ru-RU') : '-';
+            const createdDate = carrier.createdAt || carrier.created_at;
+            const createdAt = createdDate ? new Date(createdDate).toLocaleDateString('ru-RU') : '-';
 
             tr.innerHTML = `
                 <td>${carrier.name || '-'}</td>
@@ -542,14 +516,10 @@ function openOrderModal(id) {
 
 async function createOrder(event) {
     event.preventDefault();
-    console.log('📝 createOrder() вызвана!');
 
     const form = event.target;
     const formData = new FormData(form);
 
-    console.log('📋 Все поля формы (names):', Array.from(formData.keys()));
-
-    // Упрощенный сбор данных - client и carrier теперь сразу ID!
     const orderData = {
         route: {
             from: formData.get('route_from'),
@@ -561,15 +531,12 @@ async function createOrder(event) {
         },
         dateLoading: formData.get('date_loading'),
         dateUnloading: formData.get('date_unloading'),
-        client: formData.get('client'),      // Сразу ID из <select name="client">
-        carrier: formData.get('carrier'),    // Сразу ID из <select name="carrier">
+        client: formData.get('client'),
+        carrier: formData.get('carrier'),
         clientRate: parseFloat(formData.get('clientRate')),
         carrierRate: parseFloat(formData.get('carrierRate')),
         vehicleBodyType: formData.get('vehicleBodyType') || null
     };
-
-    console.log('📦 Собранные данные для отправки (orderData):', orderData);
-    console.log('📤 Отправляю POST запрос на', API_ORDERS);
 
     try {
         const response = await fetch(API_ORDERS, {
@@ -577,8 +544,6 @@ async function createOrder(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
-
-        console.log('📡 Ответ сервера - статус:', response.status);
 
         if (!response.ok) {
             const error = await response.json();
@@ -646,7 +611,7 @@ async function deleteOrder(id) {
         }
 
         showMessage('Заказ успешно удален', 'success');
-        await loadOrders(); // Перезагружаем список заказов
+        await loadOrders();
 
     } catch (error) {
         console.error(error);
@@ -741,14 +706,12 @@ async function deleteItem(type, id) {
         const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
 
         if (!response.ok) {
-            // Пытаемся прочитать сообщение об ошибке от сервера
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || `Ошибка при удалении ${itemName}`);
         }
 
         showMessage(`${itemName.charAt(0).toUpperCase() + itemName.slice(1)} успешно удален`, 'success');
 
-        // Обновляем только нужную таблицу
         if (type === 'client') await loadClients();
         else await loadCarriers();
 

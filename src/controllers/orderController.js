@@ -9,7 +9,7 @@ exports.getAllOrders = async (req, res) => {
             .populate('client', 'name')   // Подставить имя клиента вместо ID
             .populate('carrier', 'name')  // Подставить имя перевозчика вместо ID
             .populate('vehicleBodyType', 'name')  // Подставить тип кузова
-            .sort({ created_at: -1 });    // Сначала новые
+            .sort({ createdAt: -1 });    // Сначала новые
         res.json(orders);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -18,8 +18,6 @@ exports.getAllOrders = async (req, res) => {
 
 // Создать новый заказ
 exports.createOrder = async (req, res) => {
-    console.log('📥 CREATE ORDER REQUEST BODY:', JSON.stringify(req.body, null, 2));
-
     try {
         // Создаем заказ напрямую из req.body
         // Фронтенд теперь отправляет client и carrier как ID
@@ -28,11 +26,9 @@ exports.createOrder = async (req, res) => {
         // Подтягиваем связанные данные для ответа
         await newOrder.populate('client carrier vehicleBodyType');
 
-        console.log(`✅ Заказ создан: ${newOrder.route.from} → ${newOrder.route.to}`);
         res.status(201).json(newOrder);
 
     } catch (error) {
-        console.error('❌ ERROR SAVING ORDER:', error);
         console.error("❌ Ошибка при создании заказа:", error);
         res.status(400).json({ message: "Ошибка создания: " + error.message });
     }
@@ -73,7 +69,6 @@ exports.updateOrder = async (req, res) => {
             return res.status(404).json({ message: 'Заказ не найден' });
         }
 
-        console.log(`✅ Заказ обновлен: ${updatedOrder.route.from} → ${updatedOrder.route.to}`);
         res.json(updatedOrder);
 
     } catch (err) {

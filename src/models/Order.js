@@ -42,7 +42,7 @@ const orderSchema = new mongoose.Schema({
 
     // Системные поля
     status: { type: String, default: 'new' },
-    created_at: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Order', orderSchema);

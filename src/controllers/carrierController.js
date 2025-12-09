@@ -25,7 +25,6 @@ exports.create = async (req, res) => {
             phone: phone?.trim() || ''
         });
 
-        console.log(`✅ Создан новый перевозчик: ${newCarrier.name}`);
         res.status(201).json(newCarrier);
     } catch (err) {
         res.status(400).json({ message: err.message });

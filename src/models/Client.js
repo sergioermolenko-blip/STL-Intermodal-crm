@@ -10,7 +10,7 @@ const clientSchema = new mongoose.Schema({
     contactPerson: { type: String },
     phone: { type: String },
     email: { type: String },
-    created_at: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Client', clientSchema);

@@ -29,7 +29,6 @@ exports.seedVehicleBodyTypes = async (req, res) => {
 
         const created = await VehicleBodyType.insertMany(types);
 
-        console.log(`✅ Создано типов кузова: ${created.length}`);
         res.status(201).json({
             message: 'Справочник успешно заполнен',
             count: created.length,
