@@ -244,91 +244,68 @@ function setupNavigation() {
 }
 
 // ============================================
-// ДЕЛЕГИРОВАНИЕ СОБЫТИЙ
+// ДЕЛЕГИРОВАНИЕ СОБЫТИЙ (Event Delegation)
 // ============================================
 
 function setupEventListeners() {
-    console.log('🔧 Настройка обработчиков событий...');
-
-    // 1. Делегирование на таблицы
+    // 1. Таблицы справочников (Слушаем клики на уровне tbody)
+    // Мы явно передаем тип ('client' или 'carrier') в обработчик, это надежнее, чем data-type в HTML
     const clientsTableBody = document.getElementById('clientsTableBody');
     const carriersTableBody = document.getElementById('carriersTableBody');
-    const ordersList = document.getElementById('ordersList');
 
     if (clientsTableBody) {
-        clientsTableBody.addEventListener('click', handleTableClick);
+        clientsTableBody.addEventListener('click', (e) => handleTableClick(e, 'client'));
     }
-
     if (carriersTableBody) {
-        carriersTableBody.addEventListener('click', handleTableClick);
+        carriersTableBody.addEventListener('click', (e) => handleTableClick(e, 'carrier'));
     }
 
+    // 2. Таблица заказов
+    const ordersList = document.getElementById('ordersList');
     if (ordersList) {
         ordersList.addEventListener('click', handleOrderClick);
     }
 
-    // 2. Кнопки "Добавить"
+    // 3. Кнопки "Добавить" (Статические элементы)
     const btnAddClient = document.getElementById('btnAddClient');
     const btnAddCarrier = document.getElementById('btnAddCarrier');
 
-    if (btnAddClient) {
-        btnAddClient.addEventListener('click', () => openClientModal(null));
-    }
+    if (btnAddClient) btnAddClient.addEventListener('click', () => openClientModal(null));
+    if (btnAddCarrier) btnAddCarrier.addEventListener('click', () => openCarrierModal(null));
 
-    if (btnAddCarrier) {
-        btnAddCarrier.addEventListener('click', () => openCarrierModal(null));
-    }
-
-    // 3. Форма создания заказа
-    console.log('🔍 Ищу форму #orderForm...');
-    const orderForm = document.getElementById('orderForm');
-
+    // 4. Форма создания заказа
+    // Ищем форму по обоим возможным ID для надежности (на случай изменений во View)
+    const orderForm = document.getElementById('createOrderForm') || document.getElementById('orderForm');
     if (orderForm) {
-        console.log('✅ Форма #orderForm найдена!');
-        console.log('📋 Форма:', orderForm);
-
-        orderForm.addEventListener('submit', (event) => {
-            console.log('🚀 Кнопка "Создать заказ" нажата! Обработчик сработал!');
-            console.log('📦 Собираю данные из формы...');
-
-            const formData = new FormData(event.target);
-            const formDataObj = Object.fromEntries(formData);
-            console.log('📦 Данные формы (FormData):', formDataObj);
-
-            createOrder(event);
-        });
-
-        console.log('✅ Обработчик submit добавлен на форму #orderForm');
-    } else {
-        console.error('❌ ОШИБКА: Форма #orderForm не найдена в DOM!');
-        console.error('❌ Проверьте ID формы в OrderFormView.js');
-        console.error('❌ Доступные элементы с ID:',
-            Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+        orderForm.addEventListener('submit', createOrder);
     }
-
-    console.log('✅ Настройка обработчиков завершена');
 }
 
-function handleTableClick(event) {
+/**
+ * Универсальный обработчик кликов для таблиц справочников
+ * @param {Event} event - Событие клика
+ * @param {string} type - Тип сущности ('client' или 'carrier'), переданный при навешивании слушателя
+ */
+function handleTableClick(event, type) {
+    // Ищем ближайшую кнопку (поддержка клика по иконке внутри кнопки)
     const btn = event.target.closest('button');
     if (!btn) return;
 
     const id = btn.dataset.id;
-    const type = btn.dataset.type;
+    if (!id) return; // Если у кнопки нет ID, мы не знаем, с чем работать
 
-    if (!id || !type) return;
-
+    // Маршрутизация действий в зависимости от класса кнопки
     if (btn.classList.contains('btn-delete')) {
         deleteItem(type, id);
     } else if (btn.classList.contains('btn-edit')) {
-        if (type === 'client') {
-            openClientModal(id);
-        } else if (type === 'carrier') {
-            openCarrierModal(id);
-        }
+        if (type === 'client') openClientModal(id);
+        if (type === 'carrier') openCarrierModal(id);
     }
 }
 
+/**
+ * Обработчик кликов для списка заказов
+ */
 function handleOrderClick(event) {
     const btn = event.target.closest('button');
     if (!btn) return;
@@ -662,13 +639,18 @@ async function deleteOrder(id) {
 
     try {
         const response = await fetch(`${API_ORDERS}/${id}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error('Ошибка удаления заказа');
 
-        showMessage('Заказ успешно удален!', 'success');
-        loadOrders();
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Ошибка при удалении заказа');
+        }
+
+        showMessage('Заказ успешно удален', 'success');
+        await loadOrders(); // Перезагружаем список заказов
+
     } catch (error) {
-        console.error('❌ Ошибка удаления заказа:', error);
-        showMessage(`Ошибка: ${error.message}`, 'error');
+        console.error(error);
+        showMessage(`Ошибка удаления заказа: ${error.message}`, 'error');
     }
 }
 
@@ -745,26 +727,34 @@ async function saveCarrier() {
     }
 }
 
+// ============================================
+// CRUD ОПЕРАЦИИ (УДАЛЕНИЕ)
+// ============================================
+
 async function deleteItem(type, id) {
     const itemName = type === 'client' ? 'клиента' : 'перевозчика';
-    if (!confirm(`Вы уверены, что хотите удалить этого ${itemName}?`)) return;
-
     const apiUrl = type === 'client' ? API_CLIENTS : API_CARRIERS;
+
+    if (!confirm(`Вы уверены, что хотите удалить этого ${itemName}?`)) return;
 
     try {
         const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error(`Ошибка удаления ${itemName}`);
 
-        showMessage(`${itemName.charAt(0).toUpperCase() + itemName.slice(1)} успешно удален!`, 'success');
-
-        if (type === 'client') {
-            loadClients();
-        } else {
-            loadCarriers();
+        if (!response.ok) {
+            // Пытаемся прочитать сообщение об ошибке от сервера
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Ошибка при удалении ${itemName}`);
         }
+
+        showMessage(`${itemName.charAt(0).toUpperCase() + itemName.slice(1)} успешно удален`, 'success');
+
+        // Обновляем только нужную таблицу
+        if (type === 'client') await loadClients();
+        else await loadCarriers();
+
     } catch (error) {
-        console.error(`❌ Ошибка удаления ${itemName}:`, error);
-        showMessage(`Ошибка: ${error.message}`, 'error');
+        console.error(error);
+        showMessage(`Не удалось удалить: ${error.message}`, 'error');
     }
 }
 
