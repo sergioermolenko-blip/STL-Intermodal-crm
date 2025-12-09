@@ -21,57 +21,11 @@ exports.createOrder = async (req, res) => {
     console.log('📥 CREATE ORDER REQUEST BODY:', JSON.stringify(req.body, null, 2));
 
     try {
-        // 1. Обработка клиента
-        let client;
-        if (req.body.client && req.body.client.name) {
-            const clientName = req.body.client.name;
-            console.log(`🔍 Ищу клиента: "${clientName}"`);
+        // Создаем заказ напрямую из req.body
+        // Фронтенд теперь отправляет client и carrier как ID
+        const newOrder = await Order.create(req.body);
 
-            // Ищем клиента по имени
-            client = await Client.findOne({ name: clientName });
-
-            if (!client) {
-                // Если не найден - создаем нового
-                console.log(`➕ Клиент не найден, создаю нового: "${clientName}"`);
-                client = await Client.create({ name: clientName });
-                console.log(`✅ Клиент создан с ID: ${client._id}`);
-            } else {
-                console.log(`✅ Клиент найден с ID: ${client._id}`);
-            }
-        }
-
-        // 2. Обработка перевозчика
-        let carrier;
-        if (req.body.carrier && req.body.carrier.name) {
-            const carrierName = req.body.carrier.name;
-            console.log(`🔍 Ищу перевозчика: "${carrierName}"`);
-
-            // Ищем перевозчика по имени
-            carrier = await Carrier.findOne({ name: carrierName });
-
-            if (!carrier) {
-                // Если не найден - создаем нового
-                console.log(`➕ Перевозчик не найден, создаю нового: "${carrierName}"`);
-                carrier = await Carrier.create({ name: carrierName });
-                console.log(`✅ Перевозчик создан с ID: ${carrier._id}`);
-            } else {
-                console.log(`✅ Перевозчик найден с ID: ${carrier._id}`);
-            }
-        }
-
-        // 3. Формируем данные заказа с ObjectId вместо объектов
-        const orderData = {
-            ...req.body,
-            client: client ? client._id : null,
-            carrier: carrier ? carrier._id : null
-        };
-
-        console.log('📦 Финальные данные заказа:', JSON.stringify(orderData, null, 2));
-
-        // 4. Создаем заказ
-        const newOrder = await Order.create(orderData);
-
-        // 5. Подтягиваем связанные данные для ответа
+        // Подтягиваем связанные данные для ответа
         await newOrder.populate('client carrier vehicleBodyType');
 
         console.log(`✅ Заказ создан: ${newOrder.route.from} → ${newOrder.route.to}`);

@@ -170,25 +170,21 @@ async function init() {
     console.log('🚀 STL Intermodal CRM - Инициализация...');
     console.log('📍 Скрипт app.js запущен и выполняется!');
 
-    // 1. Загружаем справочники
+    // 1. КРИТИЧЕСКИ ВАЖНО: Загружаем ВСЕ данные СНАЧАЛА
     await loadDictionaries();
+    await loadClients();   // Заполняет clientsData
+    await loadCarriers();  // Заполняет carriersData
 
-    // 2. Отрисовываем форму создания заказа
+    // 2. ТОЛЬКО ПОСЛЕ загрузки данных отрисовываем форму
     const orderFormContainer = document.getElementById('orderFormContainer');
     if (orderFormContainer) {
-        orderFormContainer.innerHTML = renderOrderForm();
-
-        // Заполняем select типами кузова
-        const vehicleBodyTypeSelect = document.getElementById('vehicleBodyType');
-        if (vehicleBodyTypeSelect) {
-            vehicleBodyTypeSelect.innerHTML = '<option value="">Выберите тип кузова</option>';
-            vehicleBodyTypes.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type._id;
-                option.textContent = type.name;
-                vehicleBodyTypeSelect.appendChild(option);
-            });
-        }
+        // Передаем ВСЕ три аргумента: vehicleBodyTypes, clientsData, carriersData
+        orderFormContainer.innerHTML = renderOrderForm(vehicleBodyTypes, clientsData, carriersData);
+        console.log('✅ Форма заказа отрисована с данными:', {
+            vehicleBodyTypes: vehicleBodyTypes.length,
+            clients: clientsData.length,
+            carriers: carriersData.length
+        });
     }
 
     // 3. Настраиваем навигацию
@@ -197,10 +193,8 @@ async function init() {
     // 4. Настраиваем обработчики событий
     setupEventListeners();
 
-    // 5. Загружаем таблицы
+    // 5. Загружаем таблицу заказов
     loadOrders();
-    loadClients();
-    loadCarriers();
 
     console.log('✅ Инициализация завершена');
 }
@@ -578,6 +572,7 @@ async function createOrder(event) {
 
     console.log('📋 Все поля формы (names):', Array.from(formData.keys()));
 
+    // Упрощенный сбор данных - client и carrier теперь сразу ID!
     const orderData = {
         route: {
             from: formData.get('route_from'),
@@ -589,12 +584,8 @@ async function createOrder(event) {
         },
         dateLoading: formData.get('date_loading'),
         dateUnloading: formData.get('date_unloading'),
-        client: {
-            name: formData.get('clientName')
-        },
-        carrier: {
-            name: formData.get('carrierName')
-        },
+        client: formData.get('client'),      // Сразу ID из <select name="client">
+        carrier: formData.get('carrier'),    // Сразу ID из <select name="carrier">
         clientRate: parseFloat(formData.get('clientRate')),
         carrierRate: parseFloat(formData.get('carrierRate')),
         vehicleBodyType: formData.get('vehicleBodyType') || null
