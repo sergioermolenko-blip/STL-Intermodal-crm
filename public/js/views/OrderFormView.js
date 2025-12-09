@@ -19,7 +19,26 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
         <form id="createOrderForm" class="order-form">
             <div class="form-grid-layout">
                 
-                <!-- Блок 1: Маршрут и Даты -->
+                <!-- Блок 1: ЗАКАЗЧИК (Первая секция) -->
+                <div class="form-section">
+                    <h3 class="section-title">👤 Заказчик</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Клиент</label>
+                            <select name="client" id="clientSelect" required>
+                                <option value="" disabled selected>Выберите клиента</option>
+                                ${clientOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ставка клиента (₽)</label>
+                            <input type="number" name="clientRate" id="client_rate" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок 2: Маршрут и Даты -->
                 <div class="form-section">
                     <h3 class="section-title">📍 Маршрут и Даты</h3>
                     
@@ -46,7 +65,7 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                     </div>
                 </div>
 
-                <!-- Блок 2: Груз и Транспорт -->
+                <!-- Блок 3: Груз и Транспорт -->
                 <div class="form-section">
                     <h3 class="section-title">🚛 Груз и Транспорт</h3>
 
@@ -55,39 +74,24 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                         <input type="text" name="cargo_name" id="cargo_name" placeholder="Например: Доски" required>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Вес (кг)</label>
-                            <input type="number" name="cargo_weight" id="cargo_weight" placeholder="20000" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Тип кузова</label>
-                            <select name="vehicleBodyType" id="vehicleBodyType" required>
-                                <option value="" disabled selected>Выберите тип</option>
-                                ${bodyTypeOptions}
-                            </select>
-                        </div>
+                    <div class="form-group">
+                        <label>Вес (кг)</label>
+                        <input type="number" name="cargo_weight" id="cargo_weight" placeholder="20000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Тип кузова</label>
+                        <select name="vehicleBodyType" id="vehicleBodyType" required>
+                            <option value="" disabled selected>Выберите тип</option>
+                            ${bodyTypeOptions}
+                        </select>
                     </div>
                 </div>
 
-                <!-- Блок 3: Финансы -->
+                <!-- Блок 4: Исполнитель и Финансы (Последняя секция) -->
                 <div class="form-section">
-                    <h3 class="section-title">💰 Финансы</h3>
+                    <h3 class="section-title">💰 Исполнитель и Деньги</h3>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Клиент</label>
-                            <select name="client" id="clientSelect" required>
-                                <option value="" disabled selected>Выберите клиента</option>
-                                ${clientOptions}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ставка клиента (₽)</label>
-                            <input type="number" name="clientRate" id="client_rate" placeholder="0">
-                        </div>
-                    </div>
-
                     <div class="form-row">
                         <div class="form-group">
                             <label>Перевозчик</label>
