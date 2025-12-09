@@ -13,25 +13,19 @@ const API_CARRIERS = '/api/carriers';
 const API_DICTIONARIES = '/api/dictionaries';
 
 // ============================================
-// GLOBAL STATE
+// STATE (Глобальные переменные)
 // ============================================
-let dictionaries = {
-    vehicleBodyTypes: []
-};
-
-// Глобальные массивы данных для быстрого поиска
 let clientsData = [];
 let carriersData = [];
 let ordersData = [];
+let vehicleBodyTypes = [];
 
 // ============================================
-// FORM GENERATORS (Template Strings)
+// ГЕНЕРАТОРЫ HTML (Template Strings)
 // ============================================
 
 /**
- * Генератор HTML формы для клиента
- * @param {Object|null} client - Объект клиента для редактирования или null для создания
- * @returns {string} HTML строка формы
+ * Генератор формы клиента
  */
 function getClientFormHTML(client = null) {
     return `
@@ -67,9 +61,7 @@ function getClientFormHTML(client = null) {
 }
 
 /**
- * Генератор HTML формы для перевозчика
- * @param {Object|null} carrier - Объект перевозчика для редактирования или null для создания
- * @returns {string} HTML строка формы
+ * Генератор формы перевозчика
  */
 function getCarrierFormHTML(carrier = null) {
     return `
@@ -100,18 +92,13 @@ function getCarrierFormHTML(carrier = null) {
 }
 
 /**
- * Генератор HTML формы для редактирования заказа
- * @param {Object} order - Объект заказа для редактирования
- * @param {Array} bodyTypes - Массив типов кузова из справочника
- * @returns {string} HTML строка формы
+ * Генератор формы редактирования заказа
  */
-function getOrderFormHTML(order, bodyTypes = []) {
-    // Форматирование дат для input[type="date"]
+function getOrderFormHTML(order) {
     const dateLoading = order.dateLoading ? new Date(order.dateLoading).toISOString().split('T')[0] : '';
     const dateUnloading = order.dateUnloading ? new Date(order.dateUnloading).toISOString().split('T')[0] : '';
 
-    // Генерация options для select типов кузова
-    const bodyTypeOptions = bodyTypes.map(type => {
+    const bodyTypeOptions = vehicleBodyTypes.map(type => {
         const selected = order.vehicleBodyType === type._id ? 'selected' : '';
         return `<option value="${type._id}" ${selected}>${type.name}</option>`;
     }).join('');
@@ -122,11 +109,11 @@ function getOrderFormHTML(order, bodyTypes = []) {
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="editRouteFrom">Откуда (пункт отправления) *</label>
+                    <label for="editRouteFrom">Откуда *</label>
                     <input type="text" id="editRouteFrom" value="${order.route?.from || ''}" required>
                 </div>
                 <div class="form-group">
-                    <label for="editRouteTo">Куда (пункт назначения) *</label>
+                    <label for="editRouteTo">Куда *</label>
                     <input type="text" id="editRouteTo" value="${order.route?.to || ''}" required>
                 </div>
             </div>
@@ -176,26 +163,32 @@ function getOrderFormHTML(order, bodyTypes = []) {
 }
 
 // ============================================
-// INITIALIZATION
+// ИНИЦИАЛИЗАЦИЯ
 // ============================================
 
-/**
- * Главная функция инициализации приложения
- */
 async function init() {
     console.log('🚀 STL Intermodal CRM - Инициализация...');
 
-    // 1. Рендерим форму заказа в контейнер
+    // 1. Загружаем справочники
+    await loadDictionaries();
+
+    // 2. Отрисовываем форму создания заказа
     const orderFormContainer = document.getElementById('orderFormContainer');
     if (orderFormContainer) {
-        orderFormContainer.innerHTML = renderOrderForm(dictionaries);
-        console.log('✅ Форма заказа отрендерена');
-    } else {
-        console.error('❌ Контейнер #orderFormContainer не найден');
-    }
+        orderFormContainer.innerHTML = renderOrderForm();
 
-    // 2. Загружаем справочники
-    await loadDictionaries();
+        // Заполняем select типами кузова
+        const vehicleBodyTypeSelect = document.getElementById('vehicleBodyType');
+        if (vehicleBodyTypeSelect) {
+            vehicleBodyTypeSelect.innerHTML = '<option value="">Выберите тип кузова</option>';
+            vehicleBodyTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type._id;
+                option.textContent = type.name;
+                vehicleBodyTypeSelect.appendChild(option);
+            });
+        }
+    }
 
     // 3. Настраиваем навигацию
     setupNavigation();
@@ -203,7 +196,7 @@ async function init() {
     // 4. Настраиваем обработчики событий
     setupEventListeners();
 
-    // 5. Загружаем данные
+    // 5. Загружаем таблицы
     loadOrders();
     loadClients();
     loadCarriers();
@@ -212,12 +205,27 @@ async function init() {
 }
 
 // ============================================
-// NAVIGATION
+// ЗАГРУЗКА СПРАВОЧНИКОВ
 // ============================================
 
-/**
- * Настройка навигации между разделами
- */
+async function loadDictionaries() {
+    try {
+        const response = await fetch(API_DICTIONARIES);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        vehicleBodyTypes = data.vehicleBodyTypes || [];
+
+        console.log(`✅ Загружено типов кузова: ${vehicleBodyTypes.length}`);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки справочников:', error);
+    }
+}
+
+// ============================================
+// НАВИГАЦИЯ
+// ============================================
+
 function setupNavigation() {
     const navButtons = document.querySelectorAll('.nav-btn');
 
@@ -225,37 +233,27 @@ function setupNavigation() {
         btn.addEventListener('click', () => {
             const sectionName = btn.dataset.section;
 
-            // Убираем active у всех кнопок
             navButtons.forEach(b => b.classList.remove('active'));
-
-            // Добавляем active к текущей
             btn.classList.add('active');
 
-            // Скрываем все секции
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.add('hidden');
             });
 
-            // Показываем нужную секцию
             const targetSection = document.getElementById(`${sectionName}-section`);
             if (targetSection) {
                 targetSection.classList.remove('hidden');
             }
-
-            console.log(`📍 Переключено на раздел: ${sectionName}`);
         });
     });
 }
 
 // ============================================
-// EVENT LISTENERS
+// ДЕЛЕГИРОВАНИЕ СОБЫТИЙ
 // ============================================
 
-/**
- * Настройка всех обработчиков событий
- */
 function setupEventListeners() {
-    // 1. Делегирование событий для таблиц
+    // 1. Делегирование на таблицы
     const clientsTableBody = document.getElementById('clientsTableBody');
     const carriersTableBody = document.getElementById('carriersTableBody');
     const ordersList = document.getElementById('ordersList');
@@ -277,11 +275,11 @@ function setupEventListeners() {
     const btnAddCarrier = document.getElementById('btnAddCarrier');
 
     if (btnAddClient) {
-        btnAddClient.addEventListener('click', () => openModal('client', null));
+        btnAddClient.addEventListener('click', () => openClientModal(null));
     }
 
     if (btnAddCarrier) {
-        btnAddCarrier.addEventListener('click', () => openModal('carrier', null));
+        btnAddCarrier.addEventListener('click', () => openCarrierModal(null));
     }
 
     // 3. Форма создания заказа
@@ -291,9 +289,6 @@ function setupEventListeners() {
     }
 }
 
-/**
- * Универсальный обработчик кликов по таблицам (клиенты/перевозчики)
- */
 function handleTableClick(event) {
     const btn = event.target.closest('button');
     if (!btn) return;
@@ -306,13 +301,14 @@ function handleTableClick(event) {
     if (btn.classList.contains('btn-delete')) {
         deleteItem(type, id);
     } else if (btn.classList.contains('btn-edit')) {
-        openModal(type, id);
+        if (type === 'client') {
+            openClientModal(id);
+        } else if (type === 'carrier') {
+            openCarrierModal(id);
+        }
     }
 }
 
-/**
- * Обработчик кликов по заказам
- */
 function handleOrderClick(event) {
     const btn = event.target.closest('button');
     if (!btn) return;
@@ -323,116 +319,39 @@ function handleOrderClick(event) {
     if (btn.classList.contains('btn-delete-order')) {
         deleteOrder(id);
     } else if (btn.classList.contains('btn-edit-order')) {
-        openEditOrderModal(id);
+        openOrderModal(id);
     }
 }
 
 // ============================================
-// DICTIONARIES
+// ЗАГРУЗКА ДАННЫХ
 // ============================================
 
-/**
- * Загрузка справочников с сервера
- */
-async function loadDictionaries() {
-    try {
-        console.log('📚 Загрузка справочников...');
-
-        const response = await fetch(`${API_DICTIONARIES}`);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // Сохраняем в глобальное состояние
-        dictionaries.vehicleBodyTypes = data.vehicleBodyTypes || [];
-
-        console.log(`✅ Загружено типов кузова: ${dictionaries.vehicleBodyTypes.length}`);
-
-        // Заполняем select на странице
-        populateVehicleBodyTypeSelect();
-
-    } catch (error) {
-        console.error('❌ Ошибка загрузки справочников:', error);
-        console.warn('⚠️ Приложение продолжит работу без справочников');
-    }
-}
-
-/**
- * Заполнение select элемента типами кузова
- */
-function populateVehicleBodyTypeSelect() {
-    const select = document.getElementById('vehicleBodyType');
-
-    if (!select) {
-        console.warn('⚠️ Элемент <select id="vehicleBodyType"> не найден на странице');
-        return;
-    }
-
-    // Очищаем существующие options (кроме placeholder)
-    select.innerHTML = '<option value="">Выберите тип кузова</option>';
-
-    // Добавляем options из справочника
-    dictionaries.vehicleBodyTypes.forEach(type => {
-        const option = document.createElement('option');
-        option.value = type._id;
-        option.textContent = type.name;
-        select.appendChild(option);
-    });
-
-    console.log(`✅ Select заполнен: ${dictionaries.vehicleBodyTypes.length} опций`);
-}
-
-// ============================================
-// DATA LOADING
-// ============================================
-
-/**
- * Загрузка списка заказов
- */
 async function loadOrders() {
-    console.log('📦 Загрузка заказов...');
-
     const ordersList = document.getElementById('ordersList');
-
-    if (!ordersList) {
-        console.warn('⚠️ Элемент #ordersList не найден');
-        return;
-    }
+    if (!ordersList) return;
 
     try {
         const response = await fetch(API_ORDERS);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const orders = await response.json();
-
-        // Сохраняем в глобальное состояние
         ordersData = orders;
 
-        // Очистка контейнера
         ordersList.innerHTML = '';
 
         if (orders.length === 0) {
             ordersList.innerHTML = '<p class="no-data">Нет заказов</p>';
-            console.log('ℹ️ Заказов не найдено');
             return;
         }
 
-        // Создание карточек заказов
         orders.forEach(order => {
             const orderCard = document.createElement('div');
             orderCard.className = 'order-card';
 
-            // Расчет прибыли
             const profit = (order.clientRate || 0) - (order.carrierRate || 0);
             const profitClass = profit >= 0 ? 'profit-positive' : 'profit-negative';
 
-            // Форматирование дат
             const dateLoading = order.dateLoading ? new Date(order.dateLoading).toLocaleDateString('ru-RU') : 'Не указана';
             const dateUnloading = order.dateUnloading ? new Date(order.dateUnloading).toLocaleDateString('ru-RU') : 'Не указана';
 
@@ -442,8 +361,8 @@ async function loadOrders() {
                         <strong>${order.route?.from || 'Не указано'}</strong> → <strong>${order.route?.to || 'Не указано'}</strong>
                     </div>
                     <div class="order-actions">
-                        <button class="btn-icon btn-edit-order" data-id="${order._id}" title="Редактировать">✏️</button>
-                        <button class="btn-icon btn-delete-order" data-id="${order._id}" title="Удалить">🗑️</button>
+                        <button class="btn-icon btn-edit-order" data-id="${order._id}">✏️</button>
+                        <button class="btn-icon btn-delete-order" data-id="${order._id}">🗑️</button>
                     </div>
                 </div>
                 <div class="order-body">
@@ -488,54 +407,32 @@ async function loadOrders() {
 
             ordersList.appendChild(orderCard);
         });
-
-        console.log(`✅ Загружено заказов: ${orders.length}`);
-
     } catch (error) {
         console.error('❌ Ошибка загрузки заказов:', error);
         ordersList.innerHTML = '<p class="error">Ошибка загрузки заказов</p>';
     }
 }
 
-/**
- * Загрузка списка клиентов
- */
 async function loadClients() {
-    console.log('👥 Загрузка клиентов...');
-
     const tbody = document.getElementById('clientsTableBody');
-
-    if (!tbody) {
-        console.warn('⚠️ Элемент #clientsTableBody не найден');
-        return;
-    }
+    if (!tbody) return;
 
     try {
         const response = await fetch(API_CLIENTS);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const clients = await response.json();
-
-        // Сохраняем в глобальное состояние
         clientsData = clients;
 
-        // Очистка tbody
         tbody.innerHTML = '';
 
         if (clients.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" class="no-data">Нет клиентов</td></tr>';
-            console.log('ℹ️ Клиентов не найдено');
             return;
         }
 
-        // Создание строк таблицы
         clients.forEach(client => {
             const tr = document.createElement('tr');
-
-            // Форматирование даты
             const createdAt = client.createdAt ? new Date(client.createdAt).toLocaleDateString('ru-RU') : '-';
 
             tr.innerHTML = `
@@ -546,61 +443,39 @@ async function loadClients() {
                 <td>${client.email || '-'}</td>
                 <td>${createdAt}</td>
                 <td class="actions">
-                    <button class="btn-icon btn-edit" data-id="${client._id}" data-type="client" title="Редактировать">✏️</button>
-                    <button class="btn-icon btn-delete" data-id="${client._id}" data-type="client" title="Удалить">🗑️</button>
+                    <button class="btn-icon btn-edit" data-id="${client._id}" data-type="client">✏️</button>
+                    <button class="btn-icon btn-delete" data-id="${client._id}" data-type="client">🗑️</button>
                 </td>
             `;
 
             tbody.appendChild(tr);
         });
-
-        console.log(`✅ Загружено клиентов: ${clients.length}`);
-
     } catch (error) {
         console.error('❌ Ошибка загрузки клиентов:', error);
         tbody.innerHTML = '<tr><td colspan="7" class="error">Ошибка загрузки клиентов</td></tr>';
     }
 }
 
-/**
- * Загрузка списка перевозчиков
- */
 async function loadCarriers() {
-    console.log('🚛 Загрузка перевозчиков...');
-
     const tbody = document.getElementById('carriersTableBody');
-
-    if (!tbody) {
-        console.warn('⚠️ Элемент #carriersTableBody не найден');
-        return;
-    }
+    if (!tbody) return;
 
     try {
         const response = await fetch(API_CARRIERS);
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const carriers = await response.json();
-
-        // Сохраняем в глобальное состояние
         carriersData = carriers;
 
-        // Очистка tbody
         tbody.innerHTML = '';
 
         if (carriers.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6" class="no-data">Нет перевозчиков</td></tr>';
-            console.log('ℹ️ Перевозчиков не найдено');
             return;
         }
 
-        // Создание строк таблицы
         carriers.forEach(carrier => {
             const tr = document.createElement('tr');
-
-            // Форматирование даты
             const createdAt = carrier.createdAt ? new Date(carrier.createdAt).toLocaleDateString('ru-RU') : '-';
 
             tr.innerHTML = `
@@ -610,16 +485,13 @@ async function loadCarriers() {
                 <td>${carrier.phone || '-'}</td>
                 <td>${createdAt}</td>
                 <td class="actions">
-                    <button class="btn-icon btn-edit" data-id="${carrier._id}" data-type="carrier" title="Редактировать">✏️</button>
-                    <button class="btn-icon btn-delete" data-id="${carrier._id}" data-type="carrier" title="Удалить">🗑️</button>
+                    <button class="btn-icon btn-edit" data-id="${carrier._id}" data-type="carrier">✏️</button>
+                    <button class="btn-icon btn-delete" data-id="${carrier._id}" data-type="carrier">🗑️</button>
                 </td>
             `;
 
             tbody.appendChild(tr);
         });
-
-        console.log(`✅ Загружено перевозчиков: ${carriers.length}`);
-
     } catch (error) {
         console.error('❌ Ошибка загрузки перевозчиков:', error);
         tbody.innerHTML = '<tr><td colspan="6" class="error">Ошибка загрузки перевозчиков</td></tr>';
@@ -627,61 +499,39 @@ async function loadCarriers() {
 }
 
 // ============================================
-// MODAL LOGIC
+// МОДАЛЬНЫЕ ОКНА
 // ============================================
 
-/**
- * Открытие модального окна для редактирования/создания клиента или перевозчика
- */
-function openModal(type, id) {
-    let title, formHTML, item;
+function openClientModal(id) {
+    const client = id ? clientsData.find(c => c._id === id) : null;
+    const title = id ? 'Редактирование клиента' : 'Новый клиент';
+    const formHTML = getClientFormHTML(client);
 
-    if (type === 'client') {
-        if (id) {
-            // Редактирование
-            item = clientsData.find(c => c._id === id);
-            title = 'Редактирование клиента';
-        } else {
-            // Создание
-            title = 'Новый клиент';
-        }
-        formHTML = getClientFormHTML(item);
-
-        modalView.showForm(title, formHTML, async (event) => {
-            event.preventDefault();
-            await saveClient();
-        });
-
-    } else if (type === 'carrier') {
-        if (id) {
-            // Редактирование
-            item = carriersData.find(c => c._id === id);
-            title = 'Редактирование перевозчика';
-        } else {
-            // Создание
-            title = 'Новый перевозчик';
-        }
-        formHTML = getCarrierFormHTML(item);
-
-        modalView.showForm(title, formHTML, async (event) => {
-            event.preventDefault();
-            await saveCarrier();
-        });
-    }
+    modalView.showForm(title, formHTML, async (event) => {
+        event.preventDefault();
+        await saveClient();
+    });
 }
 
-/**
- * Открытие модального окна редактирования заказа
- */
-function openEditOrderModal(id) {
+function openCarrierModal(id) {
+    const carrier = id ? carriersData.find(c => c._id === id) : null;
+    const title = id ? 'Редактирование перевозчика' : 'Новый перевозчик';
+    const formHTML = getCarrierFormHTML(carrier);
+
+    modalView.showForm(title, formHTML, async (event) => {
+        event.preventDefault();
+        await saveCarrier();
+    });
+}
+
+function openOrderModal(id) {
     const order = ordersData.find(o => o._id === id);
     if (!order) {
         showMessage('Заказ не найден', 'error');
         return;
     }
 
-    // Генерируем форму с типами кузова из справочника
-    const formHTML = getOrderFormHTML(order, dictionaries.vehicleBodyTypes);
+    const formHTML = getOrderFormHTML(order);
 
     modalView.showForm('Редактирование заказа', formHTML, async (event) => {
         event.preventDefault();
@@ -690,12 +540,9 @@ function openEditOrderModal(id) {
 }
 
 // ============================================
-// CRUD OPERATIONS
+// CRUD ОПЕРАЦИИ
 // ============================================
 
-/**
- * Создание нового заказа
- */
 async function createOrder(event) {
     event.preventDefault();
 
@@ -727,9 +574,7 @@ async function createOrder(event) {
     try {
         const response = await fetch(API_ORDERS, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
 
@@ -738,22 +583,15 @@ async function createOrder(event) {
             throw new Error(error.message || 'Ошибка создания заказа');
         }
 
-        const result = await response.json();
-        console.log('✅ Заказ создан:', result);
-
         showMessage('Заказ успешно создан!', 'success');
         form.reset();
-        loadOrders(); // Перезагружаем список
-
+        loadOrders();
     } catch (error) {
         console.error('❌ Ошибка создания заказа:', error);
         showMessage(`Ошибка: ${error.message}`, 'error');
     }
 }
 
-/**
- * Обновление заказа
- */
 async function updateOrder() {
     const id = document.getElementById('editOrderId').value;
 
@@ -776,9 +614,7 @@ async function updateOrder() {
     try {
         const response = await fetch(`${API_ORDERS}/${id}`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
 
@@ -787,47 +623,30 @@ async function updateOrder() {
             throw new Error(error.message || 'Ошибка обновления заказа');
         }
 
-        console.log('✅ Заказ обновлен');
         showMessage('Заказ успешно обновлен!', 'success');
         modalView.close();
         loadOrders();
-
     } catch (error) {
         console.error('❌ Ошибка обновления заказа:', error);
         showMessage(`Ошибка: ${error.message}`, 'error');
     }
 }
 
-/**
- * Удаление заказа
- */
 async function deleteOrder(id) {
-    if (!confirm('Вы уверены, что хотите удалить этот заказ?')) {
-        return;
-    }
+    if (!confirm('Вы уверены, что хотите удалить этот заказ?')) return;
 
     try {
-        const response = await fetch(`${API_ORDERS}/${id}`, {
-            method: 'DELETE'
-        });
+        const response = await fetch(`${API_ORDERS}/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Ошибка удаления заказа');
 
-        if (!response.ok) {
-            throw new Error('Ошибка удаления заказа');
-        }
-
-        console.log('✅ Заказ удален');
         showMessage('Заказ успешно удален!', 'success');
         loadOrders();
-
     } catch (error) {
         console.error('❌ Ошибка удаления заказа:', error);
         showMessage(`Ошибка: ${error.message}`, 'error');
     }
 }
 
-/**
- * Сохранение клиента (создание или обновление)
- */
 async function saveClient() {
     const id = document.getElementById('clientId').value;
     const form = document.getElementById('clientForm');
@@ -847,9 +666,7 @@ async function saveClient() {
 
         const response = await fetch(url, {
             method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(clientData)
         });
 
@@ -858,20 +675,15 @@ async function saveClient() {
             throw new Error(error.message || 'Ошибка сохранения клиента');
         }
 
-        console.log(`✅ Клиент ${id ? 'обновлен' : 'создан'}`);
         showMessage(`Клиент успешно ${id ? 'обновлен' : 'создан'}!`, 'success');
         modalView.close();
         loadClients();
-
     } catch (error) {
         console.error('❌ Ошибка сохранения клиента:', error);
         showMessage(`Ошибка: ${error.message}`, 'error');
     }
 }
 
-/**
- * Сохранение перевозчика (создание или обновление)
- */
 async function saveCarrier() {
     const id = document.getElementById('carrierId').value;
     const form = document.getElementById('carrierForm');
@@ -890,9 +702,7 @@ async function saveCarrier() {
 
         const response = await fetch(url, {
             method,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(carrierData)
         });
 
@@ -901,48 +711,32 @@ async function saveCarrier() {
             throw new Error(error.message || 'Ошибка сохранения перевозчика');
         }
 
-        console.log(`✅ Перевозчик ${id ? 'обновлен' : 'создан'}`);
         showMessage(`Перевозчик успешно ${id ? 'обновлен' : 'создан'}!`, 'success');
         modalView.close();
         loadCarriers();
-
     } catch (error) {
         console.error('❌ Ошибка сохранения перевозчика:', error);
         showMessage(`Ошибка: ${error.message}`, 'error');
     }
 }
 
-/**
- * Удаление элемента (универсальная функция)
- */
 async function deleteItem(type, id) {
     const itemName = type === 'client' ? 'клиента' : 'перевозчика';
-
-    if (!confirm(`Вы уверены, что хотите удалить этого ${itemName}?`)) {
-        return;
-    }
+    if (!confirm(`Вы уверены, что хотите удалить этого ${itemName}?`)) return;
 
     const apiUrl = type === 'client' ? API_CLIENTS : API_CARRIERS;
 
     try {
-        const response = await fetch(`${apiUrl}/${id}`, {
-            method: 'DELETE'
-        });
+        const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error(`Ошибка удаления ${itemName}`);
 
-        if (!response.ok) {
-            throw new Error(`Ошибка удаления ${itemName}`);
-        }
-
-        console.log(`✅ ${itemName.charAt(0).toUpperCase() + itemName.slice(1)} удален`);
         showMessage(`${itemName.charAt(0).toUpperCase() + itemName.slice(1)} успешно удален!`, 'success');
 
-        // Перезагружаем соответствующий список
         if (type === 'client') {
             loadClients();
         } else {
             loadCarriers();
         }
-
     } catch (error) {
         console.error(`❌ Ошибка удаления ${itemName}:`, error);
         showMessage(`Ошибка: ${error.message}`, 'error');
@@ -950,12 +744,9 @@ async function deleteItem(type, id) {
 }
 
 // ============================================
-// UTILITIES
+// УТИЛИТЫ
 // ============================================
 
-/**
- * Показать сообщение пользователю
- */
 function showMessage(text, type = 'info') {
     const messageEl = document.getElementById('message');
     if (!messageEl) return;
@@ -970,8 +761,7 @@ function showMessage(text, type = 'info') {
 }
 
 // ============================================
-// START APPLICATION
+// ЗАПУСК
 // ============================================
 
-// Запуск при загрузке DOM
 document.addEventListener('DOMContentLoaded', init);
