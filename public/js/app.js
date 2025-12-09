@@ -168,6 +168,7 @@ function getOrderFormHTML(order) {
 
 async function init() {
     console.log('🚀 STL Intermodal CRM - Инициализация...');
+    console.log('📍 Скрипт app.js запущен и выполняется!');
 
     // 1. Загружаем справочники
     await loadDictionaries();
@@ -253,6 +254,8 @@ function setupNavigation() {
 // ============================================
 
 function setupEventListeners() {
+    console.log('🔧 Настройка обработчиков событий...');
+
     // 1. Делегирование на таблицы
     const clientsTableBody = document.getElementById('clientsTableBody');
     const carriersTableBody = document.getElementById('carriersTableBody');
@@ -283,10 +286,33 @@ function setupEventListeners() {
     }
 
     // 3. Форма создания заказа
-    const createOrderForm = document.getElementById('createOrderForm');
-    if (createOrderForm) {
-        createOrderForm.addEventListener('submit', createOrder);
+    console.log('🔍 Ищу форму #orderForm...');
+    const orderForm = document.getElementById('orderForm');
+
+    if (orderForm) {
+        console.log('✅ Форма #orderForm найдена!');
+        console.log('📋 Форма:', orderForm);
+
+        orderForm.addEventListener('submit', (event) => {
+            console.log('🚀 Кнопка "Создать заказ" нажата! Обработчик сработал!');
+            console.log('📦 Собираю данные из формы...');
+
+            const formData = new FormData(event.target);
+            const formDataObj = Object.fromEntries(formData);
+            console.log('📦 Данные формы (FormData):', formDataObj);
+
+            createOrder(event);
+        });
+
+        console.log('✅ Обработчик submit добавлен на форму #orderForm');
+    } else {
+        console.error('❌ ОШИБКА: Форма #orderForm не найдена в DOM!');
+        console.error('❌ Проверьте ID формы в OrderFormView.js');
+        console.error('❌ Доступные элементы с ID:',
+            Array.from(document.querySelectorAll('[id]')).map(el => el.id));
     }
+
+    console.log('✅ Настройка обработчиков завершена');
 }
 
 function handleTableClick(event) {
@@ -545,21 +571,24 @@ function openOrderModal(id) {
 
 async function createOrder(event) {
     event.preventDefault();
+    console.log('📝 createOrder() вызвана!');
 
     const form = event.target;
     const formData = new FormData(form);
 
+    console.log('📋 Все поля формы (names):', Array.from(formData.keys()));
+
     const orderData = {
         route: {
-            from: formData.get('routeFrom'),
-            to: formData.get('routeTo')
+            from: formData.get('route_from'),
+            to: formData.get('route_to')
         },
         cargo: {
-            name: formData.get('cargoName'),
-            weight: parseFloat(formData.get('cargoWeight'))
+            name: formData.get('cargo_name'),
+            weight: parseFloat(formData.get('cargo_weight'))
         },
-        dateLoading: formData.get('dateLoading'),
-        dateUnloading: formData.get('dateUnloading'),
+        dateLoading: formData.get('date_loading'),
+        dateUnloading: formData.get('date_unloading'),
         client: {
             name: formData.get('clientName')
         },
@@ -571,12 +600,17 @@ async function createOrder(event) {
         vehicleBodyType: formData.get('vehicleBodyType') || null
     };
 
+    console.log('📦 Собранные данные для отправки (orderData):', orderData);
+    console.log('📤 Отправляю POST запрос на', API_ORDERS);
+
     try {
         const response = await fetch(API_ORDERS, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         });
+
+        console.log('📡 Ответ сервера - статус:', response.status);
 
         if (!response.ok) {
             const error = await response.json();

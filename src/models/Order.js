@@ -1,37 +1,44 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-    // Связь с Клиентом
-    client: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client',
-        required: true
+    // Маршрут (вложенный объект)
+    route: {
+        from: { type: String, required: true },
+        to: { type: String, required: true }
     },
-    // Связь с Перевозчиком
-    carrier: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Carrier',
-        required: true
-    },
-    // Данные о грузе
-    route_from: { type: String, required: true },
-    route_to: { type: String, required: true },
-    cargo_name: { type: String, required: true },
-    cargo_weight: { type: Number, required: true },
-    vehicleBodyType: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'VehicleBodyType',
-        required: true
+
+    // Данные о грузе (вложенный объект)
+    cargo: {
+        name: { type: String, required: true },
+        weight: { type: Number }
     },
 
     // Даты
-    date_loading: { type: Date, required: true },
-    date_unloading: { type: Date, required: true },
+    dateLoading: { type: Date },
+    dateUnloading: { type: Date },
+
+    // Связь с Клиентом
+    client: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Client'
+    },
+
+    // Связь с Перевозчиком
+    carrier: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Carrier'
+    },
+
+    // Тип кузова
+    vehicleBodyType: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'VehicleBodyType'
+    },
 
     // Финансы
-    client_rate: { type: Number, required: true }, // Ставка Клиента
-    carrier_rate: { type: Number, required: true }, // Ставка Перевозчика
-    margin: { type: Number }, // Маржа
+    clientRate: { type: Number },
+    carrierRate: { type: Number },
+    margin: { type: Number },
 
     // Системные поля
     status: { type: String, default: 'new' },
