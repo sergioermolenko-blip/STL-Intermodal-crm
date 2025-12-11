@@ -141,6 +141,10 @@ body {
 
 /* Content Sections */
 .content-section {
+    display: none;
+}
+
+.content-section.active {
     display: block;
 }
 

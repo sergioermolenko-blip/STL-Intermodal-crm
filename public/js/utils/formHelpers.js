@@ -9,7 +9,12 @@
  */
 export function formatDate(date) {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ru-RU');
+    try {
+        return new Date(date).toLocaleDateString('ru-RU');
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return '-';
+    }
 }
 
 /**
