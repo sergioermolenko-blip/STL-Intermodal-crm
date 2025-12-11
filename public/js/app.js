@@ -374,6 +374,12 @@ async function init() {
     const orderFormContainer = document.getElementById('orderFormContainer');
     if (orderFormContainer) {
         orderFormContainer.innerHTML = renderOrderForm(vehicleBodyTypes, clientsData, carriersData, loadingTypes, packageTypes);
+
+        // Привязываем event listener для формы заказа ПОСЛЕ рендера
+        const orderForm = document.getElementById('createOrderForm');
+        if (orderForm) {
+            orderForm.addEventListener('submit', createOrder);
+        }
     }
 
     setupNavigation();
@@ -451,10 +457,8 @@ function setupEventListeners() {
     if (btnAddClient) btnAddClient.addEventListener('click', () => openClientModal(null));
     if (btnAddCarrier) btnAddCarrier.addEventListener('click', () => openCarrierModal(null));
 
-    const orderForm = document.getElementById('createOrderForm') || document.getElementById('orderForm');
-    if (orderForm) {
-        orderForm.addEventListener('submit', createOrder);
-    }
+    // Event listener для формы заказа теперь привязывается в init() после рендера
+    // Это исправляет проблему, когда listener привязывался до появления формы в DOM
 
     const contactsList = document.getElementById('contactsList');
     if (contactsList) {
