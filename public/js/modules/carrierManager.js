@@ -27,6 +27,13 @@ export async function loadCarriers() {
             return;
         }
 
+        // Сортировка: новые перевозчики сверху
+        carriers.sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.created_at || 0);
+            const dateB = new Date(b.createdAt || b.created_at || 0);
+            return dateB - dateA;
+        });
+
         carriers.forEach(carrier => {
             const tr = document.createElement('tr');
             const createdDate = carrier.createdAt || carrier.created_at;
