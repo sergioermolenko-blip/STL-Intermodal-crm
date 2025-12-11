@@ -23,6 +23,12 @@ const orderSchema = new mongoose.Schema({
         ref: 'Client'
     },
 
+    // Контактное лицо клиента
+    clientContact: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Contact'
+    },
+
     // Связь с Перевозчиком
     carrier: {
         type: mongoose.Schema.Types.ObjectId,

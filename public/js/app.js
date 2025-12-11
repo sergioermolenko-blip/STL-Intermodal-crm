@@ -460,6 +460,44 @@ function setupEventListeners() {
     if (btnAddContact) {
         btnAddContact.addEventListener('click', () => openContactModal(null));
     }
+
+    const clientSelect = document.getElementById('clientSelect');
+    if (clientSelect) {
+        clientSelect.addEventListener('change', loadClientContacts);
+    }
+}
+
+async function loadClientContacts() {
+    const clientSelect = document.getElementById('clientSelect');
+    const contactSelect = document.getElementById('clientContactSelect');
+
+    if (!clientSelect || !contactSelect) return;
+
+    const clientId = clientSelect.value;
+
+    if (!clientId) {
+        contactSelect.innerHTML = '<option value="">Сначала выберите клиента</option>';
+        return;
+    }
+
+    const clientContacts = contactsData.filter(c =>
+        c.client?._id === clientId || c.client === clientId
+    );
+
+    if (clientContacts.length === 0) {
+        contactSelect.innerHTML = '<option value="">У клиента нет контактов</option>';
+        return;
+    }
+
+    const contactOptions = clientContacts.map(contact => {
+        const phoneDisplay = contact.phones && contact.phones[0] ? ` (${contact.phones[0]})` : '';
+        return `<option value="${contact._id}">${contact.fullName}${phoneDisplay}</option>`;
+    }).join('');
+
+    contactSelect.innerHTML = `
+        <option value="">Не выбрано</option>
+        ${contactOptions}
+    `;
 }
 
 
@@ -573,6 +611,12 @@ async function loadOrders() {
                             <span class="info-label">Клиент:</span>
                             <span class="info-value">${order.client?.name || 'Не указан'}</span>
                         </div>
+                        ${order.clientContact ? `
+                        <div class="info-item">
+                            <span class="info-label">Контакт:</span>
+                            <span class="info-value">📞 ${order.clientContact.fullName} (${order.clientContact.phones[0]})</span>
+                        </div>
+                        ` : ''}
                         <div class="info-item">
                             <span class="info-label">Перевозчик:</span>
                             <span class="info-value">${order.carrier?.name || 'Не указан'}</span>
@@ -1016,6 +1060,7 @@ async function createOrder(event) {
         dateLoading: formData.get('date_loading'),
         dateUnloading: formData.get('date_unloading'),
         client: formData.get('client'),
+        clientContact: formData.get('clientContact') || null,
         carrier: formData.get('carrier'),
         clientRate: parseFloat(formData.get('clientRate')),
         carrierRate: parseFloat(formData.get('carrierRate')),

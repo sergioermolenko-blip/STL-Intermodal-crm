@@ -6,10 +6,11 @@ const Carrier = require('../models/Carrier');
 exports.getAllOrders = async (req, res) => {
     try {
         const orders = await Order.find()
-            .populate('client', 'name')   // Подставить имя клиента вместо ID
-            .populate('carrier', 'name')  // Подставить имя перевозчика вместо ID
-            .populate('vehicleBodyType', 'name')  // Подставить тип кузова
-            .sort({ createdAt: -1 });    // Сначала новые
+            .populate('client', 'name')
+            .populate('carrier', 'name')
+            .populate('vehicleBodyType', 'name')
+            .populate('clientContact', 'fullName phones email')
+            .sort({ createdAt: -1 });
         res.json(orders);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -24,7 +25,7 @@ exports.createOrder = async (req, res) => {
         const newOrder = await Order.create(req.body);
 
         // Подтягиваем связанные данные для ответа
-        await newOrder.populate('client carrier vehicleBodyType');
+        await newOrder.populate('client carrier vehicleBodyType clientContact');
 
         res.status(201).json(newOrder);
 
@@ -40,7 +41,8 @@ exports.getOrderById = async (req, res) => {
         const order = await Order.findById(req.params.id)
             .populate('client', 'name')
             .populate('carrier', 'name')
-            .populate('vehicleBodyType', 'name');
+            .populate('vehicleBodyType', 'name')
+            .populate('clientContact', 'fullName phones email');
 
         if (!order) {
             return res.status(404).json({ message: 'Заказ не найден' });
@@ -63,7 +65,7 @@ exports.updateOrder = async (req, res) => {
             orderId,
             req.body,
             { new: true, runValidators: true }
-        ).populate('client carrier vehicleBodyType');
+        ).populate('client carrier vehicleBodyType clientContact');
 
         if (!updatedOrder) {
             return res.status(404).json({ message: 'Заказ не найден' });

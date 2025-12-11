@@ -42,8 +42,20 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                             </select>
                         </div>
                         <div class="form-group">
+                            <label>Контактное лицо</label>
+                            <select name="clientContact" id="clientContactSelect">
+                                <option value="">Сначала выберите клиента</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label>Ставка клиента (₽)</label>
                             <input type="number" name="clientRate" id="client_rate" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <!-- Пустое место для симметрии -->
                         </div>
                     </div>
                 </div>
