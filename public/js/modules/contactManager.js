@@ -27,6 +27,13 @@ export async function loadContacts() {
             return;
         }
 
+        // Сортировка: новые контакты сверху
+        contacts.sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.created_at || 0);
+            const dateB = new Date(b.createdAt || b.created_at || 0);
+            return dateB - dateA;
+        });
+
         contacts.forEach(contact => {
             const card = document.createElement('div');
             card.className = 'contact-card';
