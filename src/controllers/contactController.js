@@ -12,7 +12,7 @@ exports.getAllContacts = async (req, res) => {
         const contacts = await Contact.find(filter)
             .populate('client', 'name')
             .populate('carrier', 'name')
-            .sort({ fullName: 1 });
+            .sort({ createdAt: -1 });
 
         res.json(contacts);
     } catch (err) {

@@ -35,7 +35,7 @@ exports.create = async (req, res) => {
 // Получить всех перевозчиков
 exports.getAll = async (req, res) => {
     try {
-        const carriers = await Carrier.find().sort({ name: 1 });
+        const carriers = await Carrier.find().sort({ createdAt: -1 });
         res.json(carriers);
     } catch (err) {
         res.status(500).json({ message: err.message });

@@ -32,12 +32,7 @@ export async function loadClients() {
             return;
         }
 
-        // Сортировка: новые клиенты сверху
-        clients.sort((a, b) => {
-            const dateA = new Date(a.createdAt || a.created_at || 0);
-            const dateB = new Date(b.createdAt || b.created_at || 0);
-            return dateB - dateA;
-        });
+        // Данные уже отсортированы на backend по createdAt (новые сверху)
 
         clients.forEach(client => {
             const tr = document.createElement('tr');

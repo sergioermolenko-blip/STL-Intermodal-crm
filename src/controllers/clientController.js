@@ -35,7 +35,7 @@ exports.create = async (req, res) => {
 // Получить всех клиентов
 exports.getAll = async (req, res) => {
     try {
-        const clients = await Client.find().sort({ name: 1 });
+        const clients = await Client.find().sort({ createdAt: -1 });
         res.json(clients);
     } catch (err) {
         res.status(500).json({ message: err.message });
