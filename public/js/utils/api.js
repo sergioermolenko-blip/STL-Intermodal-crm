@@ -2,181 +2,86 @@
  * Централизованные API вызовы
  */
 
-const API_BASE = '/api';
-
-// Orders API
-export async function fetchOrders() {
-    const response = await fetch(`${API_BASE}/orders`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-}
-
-export async function createOrder(data) {
-    const response = await fetch(`${API_BASE}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка создания заказа');
+/**
+ * Базовый API класс для CRUD операций
+ */
+class BaseAPI {
+    constructor(resource) {
+        this.resource = resource;
+        this.baseURL = '/api';
     }
-    return response.json();
-}
 
-export async function updateOrder(id, data) {
-    const response = await fetch(`${API_BASE}/orders/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка обновления заказа');
+    async request(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        const config = {
+            headers: { 'Content-Type': 'application/json' },
+            ...options
+        };
+
+        const response = await fetch(url, config);
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || `HTTP ${response.status}`);
+        }
+
+        return response.json();
     }
-    return response.json();
-}
 
-export async function deleteOrder(id) {
-    const response = await fetch(`${API_BASE}/orders/${id}`, {
-        method: 'DELETE'
-    });
-    if (!response.ok) throw new Error('Ошибка удаления заказа');
-    return response.json();
-}
-
-// Clients API
-export async function fetchClients() {
-    const response = await fetch(`${API_BASE}/clients`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-}
-
-export async function createClient(data) {
-    const response = await fetch(`${API_BASE}/clients`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка создания клиента');
+    async getAll() {
+        return this.request(`/${this.resource}`);
     }
-    return response.json();
-}
 
-export async function updateClient(id, data) {
-    const response = await fetch(`${API_BASE}/clients/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка обновления клиента');
+    async create(data) {
+        return this.request(`/${this.resource}`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     }
-    return response.json();
-}
 
-export async function deleteClient(id) {
-    const response = await fetch(`${API_BASE}/clients/${id}`, {
-        method: 'DELETE'
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка удаления клиента');
+    async update(id, data) {
+        return this.request(`/${this.resource}/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
     }
-    return response.json();
-}
 
-// Carriers API
-export async function fetchCarriers() {
-    const response = await fetch(`${API_BASE}/carriers`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-}
-
-export async function createCarrier(data) {
-    const response = await fetch(`${API_BASE}/carriers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка создания перевозчика');
+    async delete(id) {
+        return this.request(`/${this.resource}/${id}`, {
+            method: 'DELETE'
+        });
     }
-    return response.json();
 }
 
-export async function updateCarrier(id, data) {
-    const response = await fetch(`${API_BASE}/carriers/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка обновления перевозчика');
-    }
-    return response.json();
-}
+// Создаем экземпляры для каждого ресурса
+const ordersAPI = new BaseAPI('orders');
+const clientsAPI = new BaseAPI('clients');
+const carriersAPI = new BaseAPI('carriers');
+const contactsAPI = new BaseAPI('contacts');
 
-export async function deleteCarrier(id) {
-    const response = await fetch(`${API_BASE}/carriers/${id}`, {
-        method: 'DELETE'
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка удаления перевозчика');
-    }
-    return response.json();
-}
+// Экспортируем методы (для обратной совместимости)
+export const fetchOrders = () => ordersAPI.getAll();
+export const createOrder = (data) => ordersAPI.create(data);
+export const updateOrder = (id, data) => ordersAPI.update(id, data);
+export const deleteOrder = (id) => ordersAPI.delete(id);
 
-// Contacts API
-export async function fetchContacts() {
-    const response = await fetch(`${API_BASE}/contacts`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-}
+export const fetchClients = () => clientsAPI.getAll();
+export const createClient = (data) => clientsAPI.create(data);
+export const updateClient = (id, data) => clientsAPI.update(id, data);
+export const deleteClient = (id) => clientsAPI.delete(id);
 
-export async function createContact(data) {
-    const response = await fetch(`${API_BASE}/contacts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка создания контакта');
-    }
-    return response.json();
-}
+export const fetchCarriers = () => carriersAPI.getAll();
+export const createCarrier = (data) => carriersAPI.create(data);
+export const updateCarrier = (id, data) => carriersAPI.update(id, data);
+export const deleteCarrier = (id) => carriersAPI.delete(id);
 
-export async function updateContact(id, data) {
-    const response = await fetch(`${API_BASE}/contacts/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка обновления контакта');
-    }
-    return response.json();
-}
+export const fetchContacts = () => contactsAPI.getAll();
+export const createContact = (data) => contactsAPI.create(data);
+export const updateContact = (id, data) => contactsAPI.update(id, data);
+export const deleteContact = (id) => contactsAPI.delete(id);
 
-export async function deleteContact(id) {
-    const response = await fetch(`${API_BASE}/contacts/${id}`, {
-        method: 'DELETE'
-    });
-    if (!response.ok) throw new Error('Ошибка удаления контакта');
-    return response.json();
-}
-
-// Dictionaries API
 export async function fetchDictionaries() {
-    const response = await fetch(`${API_BASE}/dictionaries`);
+    const response = await fetch('/api/dictionaries');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
 }
