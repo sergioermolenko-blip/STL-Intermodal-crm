@@ -32,6 +32,27 @@ let packageTypes = [];
  * Генератор формы клиента
  */
 function getClientFormHTML(client = null) {
+    const clientContacts = client?._id
+        ? contactsData.filter(c => c.client?._id === client._id || c.client === client._id)
+        : [];
+
+    const contactsListHTML = clientContacts.length > 0
+        ? clientContacts.map(contact => `
+            <div class="company-contact-item">
+                <div class="company-contact-info">
+                    <div class="company-contact-name">👤 ${contact.fullName}</div>
+                    <div class="company-contact-details">
+                        📞 ${contact.phones[0]} | ✉️ ${contact.email}
+                    </div>
+                </div>
+                <div class="company-contact-actions">
+                    <button type="button" class="btn-icon btn-edit-company-contact" data-contact-id="${contact._id}">✏️</button>
+                    <button type="button" class="btn-icon btn-delete-company-contact" data-contact-id="${contact._id}">🗑️</button>
+                </div>
+            </div>
+        `).join('')
+        : '<p class="no-data">У этой компании пока нет контактов</p>';
+
     return `
         <form id="clientForm" class="modal-form">
             <input type="hidden" id="clientId" value="${client?._id || ''}">
@@ -60,14 +81,48 @@ function getClientFormHTML(client = null) {
                 <label for="clientEmail">Email</label>
                 <input type="email" id="clientEmail" name="email" value="${client?.email || ''}">
             </div>
+
+            ${client?._id ? `
+                <div class="company-contacts-section">
+                    <h3>Контакты компании</h3>
+                    <div class="company-contacts-list">
+                        ${contactsListHTML}
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-small" id="btnAddClientContact">
+                        ➕ Добавить контакт к этой компании
+                    </button>
+                </div>
+            ` : ''}
         </form>
     `;
 }
+
 
 /**
  * Генератор формы перевозчика
  */
 function getCarrierFormHTML(carrier = null) {
+    const carrierContacts = carrier?._id
+        ? contactsData.filter(c => c.carrier?._id === carrier._id || c.carrier === carrier._id)
+        : [];
+
+    const contactsListHTML = carrierContacts.length > 0
+        ? carrierContacts.map(contact => `
+            <div class="company-contact-item">
+                <div class="company-contact-info">
+                    <div class="company-contact-name">👤 ${contact.fullName}</div>
+                    <div class="company-contact-details">
+                        📞 ${contact.phones[0]} | ✉️ ${contact.email}
+                    </div>
+                </div>
+                <div class="company-contact-actions">
+                    <button type="button" class="btn-icon btn-edit-company-contact" data-contact-id="${contact._id}">✏️</button>
+                    <button type="button" class="btn-icon btn-delete-company-contact" data-contact-id="${contact._id}">🗑️</button>
+                </div>
+            </div>
+        `).join('')
+        : '<p class="no-data">У этой компании пока нет контактов</p>';
+
     return `
         <form id="carrierForm" class="modal-form">
             <input type="hidden" id="carrierId" value="${carrier?._id || ''}">
@@ -91,9 +146,22 @@ function getCarrierFormHTML(carrier = null) {
                 <label for="carrierPhone">Телефон</label>
                 <input type="tel" id="carrierPhone" name="phone" value="${carrier?.phone || ''}">
             </div>
+
+            ${carrier?._id ? `
+                <div class="company-contacts-section">
+                    <h3>Контакты компании</h3>
+                    <div class="company-contacts-list">
+                        ${contactsListHTML}
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-small" id="btnAddCarrierContact">
+                        ➕ Добавить контакт к этой компании
+                    </button>
+                </div>
+            ` : ''}
         </form>
     `;
 }
+
 
 /**
  * Генератор формы контакта
@@ -702,6 +770,10 @@ function openClientModal(id) {
         event.preventDefault();
         await saveClient();
     });
+
+    if (id) {
+        setupCompanyContactHandlers('client', id);
+    }
 }
 
 function openCarrierModal(id) {
@@ -713,7 +785,65 @@ function openCarrierModal(id) {
         event.preventDefault();
         await saveCarrier();
     });
+
+    if (id) {
+        setupCompanyContactHandlers('carrier', id);
+    }
 }
+
+function setupCompanyContactHandlers(type, companyId) {
+    const btnAddContact = document.getElementById(type === 'client' ? 'btnAddClientContact' : 'btnAddCarrierContact');
+
+    if (btnAddContact) {
+        btnAddContact.addEventListener('click', () => {
+            openContactModalForCompany(type, companyId);
+        });
+    }
+
+    const contactsList = document.querySelector('.company-contacts-list');
+    if (contactsList) {
+        contactsList.addEventListener('click', (e) => {
+            const editBtn = e.target.closest('.btn-edit-company-contact');
+            const deleteBtn = e.target.closest('.btn-delete-company-contact');
+
+            if (editBtn) {
+                const contactId = editBtn.dataset.contactId;
+                openContactModal(contactId);
+            } else if (deleteBtn) {
+                const contactId = deleteBtn.dataset.contactId;
+                deleteContact(contactId);
+            }
+        });
+    }
+}
+
+function openContactModalForCompany(type, companyId) {
+    const formHTML = getContactFormHTML(null);
+
+    modalView.showForm('Новый контакт', formHTML, async (event) => {
+        event.preventDefault();
+        await saveContact();
+    });
+
+    setupPhoneDynamicFields();
+
+    setTimeout(() => {
+        if (type === 'client') {
+            document.querySelector('input[name="relatedTo"][value="client"]').checked = true;
+            document.getElementById('clientSelectGroup').style.display = 'block';
+            document.getElementById('carrierSelectGroup').style.display = 'none';
+            document.getElementById('contactClient').value = companyId;
+        } else {
+            document.querySelector('input[name="relatedTo"][value="carrier"]').checked = true;
+            document.getElementById('clientSelectGroup').style.display = 'none';
+            document.getElementById('carrierSelectGroup').style.display = 'block';
+            document.getElementById('contactCarrier').value = companyId;
+        }
+
+        setupRelatedToToggle();
+    }, 100);
+}
+
 
 function openContactModal(id) {
     const contact = id ? contactsData.find(c => c._id === id) : null;
