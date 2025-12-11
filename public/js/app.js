@@ -133,18 +133,23 @@ function getCarrierFormHTML(carrier = null) {
             </div>
             
             <div class="form-group">
-                <label for="carrierDriverName">Водитель</label>
-                <input type="text" id="carrierDriverName" name="driverName" value="${carrier?.driverName || ''}">
+                <label for="carrierInn">ИНН</label>
+                <input type="text" id="carrierInn" name="inn" value="${carrier?.inn || ''}">
             </div>
             
             <div class="form-group">
-                <label for="carrierTruckNumber">Номер грузовика</label>
-                <input type="text" id="carrierTruckNumber" name="truckNumber" value="${carrier?.truckNumber || ''}">
+                <label for="carrierContactPerson">Контактное лицо</label>
+                <input type="text" id="carrierContactPerson" name="contactPerson" value="${carrier?.contactPerson || ''}">
             </div>
             
             <div class="form-group">
                 <label for="carrierPhone">Телефон</label>
                 <input type="tel" id="carrierPhone" name="phone" value="${carrier?.phone || ''}">
+            </div>
+            
+            <div class="form-group">
+                <label for="carrierEmail">Email</label>
+                <input type="email" id="carrierEmail" name="email" value="${carrier?.email || ''}">
             </div>
 
             ${carrier?._id ? `
@@ -705,7 +710,7 @@ async function loadCarriers() {
         tbody.innerHTML = '';
 
         if (carriers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="no-data">Нет перевозчиков</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">Нет перевозчиков</td></tr>';
             return;
         }
 
@@ -716,9 +721,10 @@ async function loadCarriers() {
 
             tr.innerHTML = `
                 <td>${carrier.name || '-'}</td>
-                <td>${carrier.driverName || '-'}</td>
-                <td>${carrier.truckNumber || '-'}</td>
+                <td>${carrier.inn || '-'}</td>
+                <td>${carrier.contactPerson || '-'}</td>
                 <td>${carrier.phone || '-'}</td>
+                <td>${carrier.email || '-'}</td>
                 <td>${createdAt}</td>
                 <td class="actions">
                     <button class="btn-icon btn-edit" data-id="${carrier._id}" data-type="carrier">✏️</button>
@@ -730,7 +736,7 @@ async function loadCarriers() {
         });
     } catch (error) {
         console.error('❌ Ошибка загрузки перевозчиков:', error);
-        tbody.innerHTML = '<tr><td colspan="6" class="error">Ошибка загрузки перевозчиков</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="error">Ошибка загрузки перевозчиков</td></tr>';
     }
 }
 
@@ -1196,9 +1202,10 @@ async function saveCarrier() {
 
     const carrierData = {
         name: formData.get('name'),
-        driverName: formData.get('driverName'),
-        truckNumber: formData.get('truckNumber'),
-        phone: formData.get('phone')
+        inn: formData.get('inn'),
+        contactPerson: formData.get('contactPerson'),
+        phone: formData.get('phone'),
+        email: formData.get('email')
     };
 
     try {

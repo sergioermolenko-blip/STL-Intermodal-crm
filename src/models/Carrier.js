@@ -6,9 +6,10 @@ const carrierSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    driverName: { type: String },
-    truckNumber: { type: String },
+    inn: { type: String },
+    contactPerson: { type: String },
     phone: { type: String },
+    email: { type: String },
     createdAt: { type: Date, default: Date.now }
 });
 

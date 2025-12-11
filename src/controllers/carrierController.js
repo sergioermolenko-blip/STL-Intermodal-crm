@@ -4,7 +4,7 @@ const Order = require('../models/Order');
 // Создать нового перевозчика
 exports.create = async (req, res) => {
     try {
-        const { name, driverName, truckNumber, phone } = req.body;
+        const { name, inn, contactPerson, phone, email } = req.body;
 
         // Проверка обязательных полей
         if (!name || !name.trim()) {
@@ -20,9 +20,10 @@ exports.create = async (req, res) => {
 
         const newCarrier = await Carrier.create({
             name: name.trim(),
-            driverName: driverName?.trim() || '',
-            truckNumber: truckNumber?.trim() || '',
-            phone: phone?.trim() || ''
+            inn: inn?.trim() || '',
+            contactPerson: contactPerson?.trim() || '',
+            phone: phone?.trim() || '',
+            email: email?.trim() || ''
         });
 
         res.status(201).json(newCarrier);
@@ -44,7 +45,7 @@ exports.getAll = async (req, res) => {
 // Обновить перевозчика
 exports.update = async (req, res) => {
     try {
-        const { name, driverName, truckNumber, phone } = req.body;
+        const { name, inn, contactPerson, phone, email } = req.body;
 
         // Проверка обязательных полей
         if (!name || !name.trim()) {
@@ -65,9 +66,10 @@ exports.update = async (req, res) => {
             req.params.id,
             {
                 name: name.trim(),
-                driverName: driverName?.trim() || '',
-                truckNumber: truckNumber?.trim() || '',
-                phone: phone?.trim() || ''
+                inn: inn?.trim() || '',
+                contactPerson: contactPerson?.trim() || '',
+                phone: phone?.trim() || '',
+                email: email?.trim() || ''
             },
             { new: true, runValidators: true }
         );
