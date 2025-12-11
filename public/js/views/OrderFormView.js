@@ -1,4 +1,4 @@
-export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = []) {
+export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = [], loadingTypes = [], packageTypes = []) {
     // 1. Генерируем опции для Типов Кузова
     const bodyTypeOptions = vehicleBodyTypes.map(type =>
         `<option value="${type._id}">${type.name}</option>`
@@ -14,7 +14,17 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
         `<option value="${carrier._id}">${carrier.name}</option>`
     ).join('');
 
-    // 4. Возвращаем HTML формы с Grid Layout
+    // 4. Генерируем опции для Типов Загрузки
+    const loadingTypeOptions = loadingTypes.map(type =>
+        `<option value="${type._id}">${type.name}</option>`
+    ).join('');
+
+    // 5. Генерируем опции для Типов Упаковки
+    const packageTypeOptions = packageTypes.map(type =>
+        `<option value="${type._id}">${type.name}</option>`
+    ).join('');
+
+    // 6. Возвращаем HTML формы с Grid Layout
     return `
         <form id="createOrderForm" class="order-form">
             <div class="form-grid-layout">
@@ -69,22 +79,40 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                 <div class="form-section">
                     <h3 class="section-title">🚛 Груз и Транспорт</h3>
 
-                    <div class="form-group">
-                        <label>Характер груза</label>
-                        <input type="text" name="cargo_name" id="cargo_name" placeholder="Например: Доски" required>
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Характер груза</label>
+                            <input type="text" name="cargo_name" id="cargo_name" placeholder="Например: Доски" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Вес (кг)</label>
+                            <input type="number" name="cargo_weight" id="cargo_weight" placeholder="20000" required>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Вес (кг)</label>
-                        <input type="number" name="cargo_weight" id="cargo_weight" placeholder="20000" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Тип кузова</label>
-                        <select name="vehicleBodyType" id="vehicleBodyType" required>
-                            <option value="" disabled selected>Выберите тип</option>
-                            ${bodyTypeOptions}
+                        <label>Тип упаковки</label>
+                        <select name="packageType" id="packageType">
+                            <option value="" disabled selected>Выберите тип упаковки</option>
+                            ${packageTypeOptions}
                         </select>
+                    </div>
+
+                    <div class="form-row" style="display: flex; gap: 1rem;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Тип кузова</label>
+                            <select name="vehicleBodyType" id="vehicleBodyType" required>
+                                <option value="" disabled selected>Выберите тип</option>
+                                ${bodyTypeOptions}
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Тип загрузки</label>
+                            <select name="loadingType" id="loadingType">
+                                <option value="" disabled selected>Выберите тип загрузки</option>
+                                ${loadingTypeOptions}
+                            </select>
+                        </div>
                     </div>
                 </div>
 

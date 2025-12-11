@@ -28,6 +28,10 @@
                     <span class="nav-icon">🚛</span>
                     <span class="nav-text">Перевозчики</span>
                 </button>
+                <button class="nav-btn" data-section="contacts">
+                    <span class="nav-icon">📞</span>
+                    <span class="nav-text">Контакты</span>
+                </button>
             </nav>
         </aside>
 
@@ -120,6 +124,24 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Contacts Section -->
+            <section id="contacts-section" class="content-section hidden">
+                <header class="section-header">
+                    <h1>📞 Справочник контактов</h1>
+                    <p class="section-subtitle">Управление контактными лицами клиентов и перевозчиков</p>
+                </header>
+
+                <div class="card">
+                    <div class="card-header-with-button">
+                        <h2>Список контактов</h2>
+                        <button id="btnAddContact" class="btn btn-primary">➕ Добавить контакт</button>
+                    </div>
+                    <div id="contactsList" class="contacts-list">
+                        <p class="loading">Загрузка контактов...</p>
                     </div>
                 </div>
             </section>

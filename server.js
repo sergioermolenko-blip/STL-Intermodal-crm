@@ -20,6 +20,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/clients', require('./src/routes/clientRoutes'));
 app.use('/api/carriers', require('./src/routes/carrierRoutes'));
 app.use('/api/dictionaries', require('./src/routes/dictionaryRoutes'));
+app.use('/api/contacts', require('./src/routes/contactRoutes'));
 
 // Тестовый роут
 app.get('/test', (req, res) => res.json({ status: 'ok' }));

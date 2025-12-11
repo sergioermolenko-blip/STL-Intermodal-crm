@@ -11,6 +11,7 @@ const API_ORDERS = '/api/orders';
 const API_CLIENTS = '/api/clients';
 const API_CARRIERS = '/api/carriers';
 const API_DICTIONARIES = '/api/dictionaries';
+const API_CONTACTS = '/api/contacts';
 
 // ============================================
 // STATE (Глобальные переменные)
@@ -18,7 +19,10 @@ const API_DICTIONARIES = '/api/dictionaries';
 let clientsData = [];
 let carriersData = [];
 let ordersData = [];
+let contactsData = [];
 let vehicleBodyTypes = [];
+let loadingTypes = [];
+let packageTypes = [];
 
 // ============================================
 // ГЕНЕРАТОРЫ HTML (Template Strings)
@@ -92,6 +96,99 @@ function getCarrierFormHTML(carrier = null) {
 }
 
 /**
+ * Генератор формы контакта
+ */
+function getContactFormHTML(contact = null) {
+    const clientOptions = clientsData.map(client =>
+        `<option value="${client._id}" ${contact?.client?._id === client._id ? 'selected' : ''}>${client.name}</option>`
+    ).join('');
+
+    const carrierOptions = carriersData.map(carrier =>
+        `<option value="${carrier._id}" ${contact?.carrier?._id === carrier._id ? 'selected' : ''}>${carrier.name}</option>`
+    ).join('');
+
+    const relatedToClient = contact?.relatedTo === 'client' || !contact;
+    const relatedToCarrier = contact?.relatedTo === 'carrier';
+
+    const phonesHTML = contact?.phones?.map((phone, index) => `
+        <div class="phone-input-group" data-index="${index}">
+            <input type="tel" name="phone_${index}" value="${phone}" required>
+            ${index > 0 ? '<button type="button" class="btn-remove-phone">✖</button>' : ''}
+        </div>
+    `).join('') || `
+        <div class="phone-input-group" data-index="0">
+            <input type="tel" name="phone_0" required>
+        </div>
+    `;
+
+    return `
+        <form id="contactForm" class="modal-form">
+            <input type="hidden" id="contactId" value="${contact?._id || ''}">
+            
+            <div class="form-group">
+                <label for="contactFullName">ФИО *</label>
+                <input type="text" id="contactFullName" name="fullName" value="${contact?.fullName || ''}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Тип компании *</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="relatedTo" value="client" ${relatedToClient ? 'checked' : ''} required>
+                        Клиент
+                    </label>
+                    <label>
+                        <input type="radio" name="relatedTo" value="carrier" ${relatedToCarrier ? 'checked' : ''}>
+                        Перевозчик
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" id="clientSelectGroup" ${relatedToCarrier ? 'style="display:none"' : ''}>
+                <label for="contactClient">Клиент *</label>
+                <select id="contactClient" name="client">
+                    <option value="">Выберите клиента</option>
+                    ${clientOptions}
+                </select>
+            </div>
+
+            <div class="form-group" id="carrierSelectGroup" ${relatedToClient ? 'style="display:none"' : ''}>
+                <label for="contactCarrier">Перевозчик *</label>
+                <select id="contactCarrier" name="carrier">
+                    <option value="">Выберите перевозчика</option>
+                    ${carrierOptions}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Телефоны *</label>
+                <div id="phonesContainer">
+                    ${phonesHTML}
+                </div>
+                <button type="button" id="btnAddPhone" class="btn btn-secondary btn-small">+ Добавить телефон</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="contactEmail">Email *</label>
+                <input type="email" id="contactEmail" name="email" value="${contact?.email || ''}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contactNotes">Комментарии</label>
+                <textarea id="contactNotes" name="notes" rows="4">${contact?.notes || ''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="contactIsActive" name="isActive" ${contact?.isActive !== false ? 'checked' : ''}>
+                    Активен
+                </label>
+            </div>
+        </form>
+    `;
+}
+
+/**
  * Генератор формы редактирования заказа
  */
 function getOrderFormHTML(order) {
@@ -100,6 +197,16 @@ function getOrderFormHTML(order) {
 
     const bodyTypeOptions = vehicleBodyTypes.map(type => {
         const selected = order.vehicleBodyType === type._id ? 'selected' : '';
+        return `<option value="${type._id}" ${selected}>${type.name}</option>`;
+    }).join('');
+
+    const packageTypeOptions = packageTypes.map(type => {
+        const selected = order.packageType === type._id ? 'selected' : '';
+        return `<option value="${type._id}" ${selected}>${type.name}</option>`;
+    }).join('');
+
+    const loadingTypeOptions = loadingTypes.map(type => {
+        const selected = order.loadingType === type._id ? 'selected' : '';
         return `<option value="${type._id}" ${selected}>${type.name}</option>`;
     }).join('');
 
@@ -141,11 +248,28 @@ function getOrderFormHTML(order) {
             </div>
             
             <div class="form-group">
-                <label for="editVehicleBodyType">Тип кузова</label>
-                <select id="editVehicleBodyType" name="vehicleBodyType">
-                    <option value="">Выберите тип кузова</option>
-                    ${bodyTypeOptions}
+                <label for="editPackageType">Тип упаковки</label>
+                <select id="editPackageType" name="packageType">
+                    <option value="">Выберите тип упаковки</option>
+                    ${packageTypeOptions}
                 </select>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="editVehicleBodyType">Тип кузова</label>
+                    <select id="editVehicleBodyType" name="vehicleBodyType">
+                        <option value="">Выберите тип кузова</option>
+                        ${bodyTypeOptions}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editLoadingType">Тип загрузки</label>
+                    <select id="editLoadingType" name="loadingType">
+                        <option value="">Выберите тип загрузки</option>
+                        ${loadingTypeOptions}
+                    </select>
+                </div>
             </div>
             
             <div class="form-row">
@@ -172,10 +296,11 @@ async function init() {
     await loadDictionaries();
     await loadClients();
     await loadCarriers();
+    await loadContacts();
 
     const orderFormContainer = document.getElementById('orderFormContainer');
     if (orderFormContainer) {
-        orderFormContainer.innerHTML = renderOrderForm(vehicleBodyTypes, clientsData, carriersData);
+        orderFormContainer.innerHTML = renderOrderForm(vehicleBodyTypes, clientsData, carriersData, loadingTypes, packageTypes);
     }
 
     setupNavigation();
@@ -194,6 +319,8 @@ async function loadDictionaries() {
 
         const data = await response.json();
         vehicleBodyTypes = data.vehicleBodyTypes || [];
+        loadingTypes = data.loadingTypes || [];
+        packageTypes = data.packageTypes || [];
     } catch (error) {
         console.error('❌ Ошибка загрузки справочников:', error);
     }
@@ -255,7 +382,18 @@ function setupEventListeners() {
     if (orderForm) {
         orderForm.addEventListener('submit', createOrder);
     }
+
+    const contactsList = document.getElementById('contactsList');
+    if (contactsList) {
+        contactsList.addEventListener('click', handleContactClick);
+    }
+
+    const btnAddContact = document.getElementById('btnAddContact');
+    if (btnAddContact) {
+        btnAddContact.addEventListener('click', () => openContactModal(null));
+    }
 }
+
 
 /**
  * Универсальный обработчик кликов для таблиц справочников
@@ -291,6 +429,21 @@ function handleOrderClick(event) {
         openOrderModal(id);
     }
 }
+
+function handleContactClick(event) {
+    const btn = event.target.closest('button');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    if (!id) return;
+
+    if (btn.classList.contains('btn-delete-contact')) {
+        deleteContact(id);
+    } else if (btn.classList.contains('btn-edit-contact')) {
+        openContactModal(id);
+    }
+}
+
 
 // ============================================
 // ЗАГРУЗКА ДАННЫХ
@@ -469,6 +622,73 @@ async function loadCarriers() {
     }
 }
 
+async function loadContacts() {
+    const contactsList = document.getElementById('contactsList');
+    if (!contactsList) return;
+
+    try {
+        const response = await fetch(API_CONTACTS);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const contacts = await response.json();
+        contactsData = contacts;
+
+        contactsList.innerHTML = '';
+
+        if (contacts.length === 0) {
+            contactsList.innerHTML = '<p class="no-data">Нет контактов</p>';
+            return;
+        }
+
+        contacts.forEach(contact => {
+            const contactCard = document.createElement('div');
+            contactCard.className = 'contact-card';
+
+            if (!contact.isActive) {
+                contactCard.classList.add('inactive');
+            }
+
+            const companyName = contact.client?.name || contact.carrier?.name || 'Не указана';
+            const companyType = contact.relatedTo === 'client' ? 'Клиент' : 'Перевозчик';
+
+            const phonesHTML = contact.phones.map(phone =>
+                `<div class="contact-phone">📞 ${phone}</div>`
+            ).join('');
+
+            const notesHTML = contact.notes
+                ? `<div class="contact-notes">💬 ${contact.notes}</div>`
+                : '';
+
+            const statusBadge = !contact.isActive
+                ? '<span class="status-badge inactive">❌ Неактивен</span>'
+                : '';
+
+            contactCard.innerHTML = `
+                <div class="contact-header">
+                    <div class="contact-name">
+                        👤 ${contact.fullName} ${statusBadge}
+                    </div>
+                    <div class="contact-actions">
+                        <button class="btn-icon btn-edit-contact" data-id="${contact._id}">✏️</button>
+                        <button class="btn-icon btn-delete-contact" data-id="${contact._id}">🗑️</button>
+                    </div>
+                </div>
+                <div class="contact-body">
+                    <div class="contact-company">🏢 ${companyName} (${companyType})</div>
+                    ${phonesHTML}
+                    <div class="contact-email">✉️ ${contact.email}</div>
+                    ${notesHTML}
+                </div>
+            `;
+
+            contactsList.appendChild(contactCard);
+        });
+    } catch (error) {
+        console.error('❌ Ошибка загрузки контактов:', error);
+        contactsList.innerHTML = '<p class="error">Ошибка загрузки контактов</p>';
+    }
+}
+
 // ============================================
 // МОДАЛЬНЫЕ ОКНА
 // ============================================
@@ -493,6 +713,140 @@ function openCarrierModal(id) {
         event.preventDefault();
         await saveCarrier();
     });
+}
+
+function openContactModal(id) {
+    const contact = id ? contactsData.find(c => c._id === id) : null;
+    const title = id ? 'Редактирование контакта' : 'Новый контакт';
+    const formHTML = getContactFormHTML(contact);
+
+    modalView.showForm(title, formHTML, async (event) => {
+        event.preventDefault();
+        await saveContact();
+    });
+
+    setupPhoneDynamicFields();
+    setupRelatedToToggle();
+}
+
+function setupPhoneDynamicFields() {
+    const btnAddPhone = document.getElementById('btnAddPhone');
+    const phonesContainer = document.getElementById('phonesContainer');
+
+    if (btnAddPhone) {
+        btnAddPhone.addEventListener('click', () => {
+            const phoneGroups = phonesContainer.querySelectorAll('.phone-input-group');
+            const newIndex = phoneGroups.length;
+
+            const newPhoneGroup = document.createElement('div');
+            newPhoneGroup.className = 'phone-input-group';
+            newPhoneGroup.dataset.index = newIndex;
+            newPhoneGroup.innerHTML = `
+                <input type="tel" name="phone_${newIndex}" required>
+                <button type="button" class="btn-remove-phone">✖</button>
+            `;
+
+            phonesContainer.appendChild(newPhoneGroup);
+
+            newPhoneGroup.querySelector('.btn-remove-phone').addEventListener('click', () => {
+                newPhoneGroup.remove();
+            });
+        });
+    }
+
+    phonesContainer.querySelectorAll('.btn-remove-phone').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.target.closest('.phone-input-group').remove();
+        });
+    });
+}
+
+function setupRelatedToToggle() {
+    const relatedToRadios = document.querySelectorAll('input[name="relatedTo"]');
+    const clientSelectGroup = document.getElementById('clientSelectGroup');
+    const carrierSelectGroup = document.getElementById('carrierSelectGroup');
+
+    relatedToRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'client') {
+                clientSelectGroup.style.display = 'block';
+                carrierSelectGroup.style.display = 'none';
+                document.getElementById('contactCarrier').value = '';
+            } else {
+                clientSelectGroup.style.display = 'none';
+                carrierSelectGroup.style.display = 'block';
+                document.getElementById('contactClient').value = '';
+            }
+        });
+    });
+}
+
+async function saveContact() {
+    const id = document.getElementById('contactId').value;
+    const form = document.getElementById('contactForm');
+    const formData = new FormData(form);
+
+    const phones = [];
+    const phoneInputs = form.querySelectorAll('input[type="tel"]');
+    phoneInputs.forEach(input => {
+        if (input.value.trim()) {
+            phones.push(input.value.trim());
+        }
+    });
+
+    const contactData = {
+        fullName: formData.get('fullName'),
+        phones: phones,
+        email: formData.get('email'),
+        notes: formData.get('notes') || '',
+        isActive: formData.get('isActive') === 'on',
+        relatedTo: formData.get('relatedTo'),
+        client: formData.get('relatedTo') === 'client' ? formData.get('client') : null,
+        carrier: formData.get('relatedTo') === 'carrier' ? formData.get('carrier') : null
+    };
+
+    try {
+        const url = id ? `${API_CONTACTS}/${id}` : API_CONTACTS;
+        const method = id ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(contactData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка сохранения контакта');
+        }
+
+        showMessage(`Контакт успешно ${id ? 'обновлен' : 'создан'}!`, 'success');
+        modalView.close();
+        loadContacts();
+    } catch (error) {
+        console.error('❌ Ошибка сохранения контакта:', error);
+        showMessage(`Ошибка: ${error.message}`, 'error');
+    }
+}
+
+async function deleteContact(id) {
+    if (!confirm('Вы уверены, что хотите удалить этот контакт?')) return;
+
+    try {
+        const response = await fetch(`${API_CONTACTS}/${id}`, { method: 'DELETE' });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || 'Ошибка при удалении контакта');
+        }
+
+        showMessage('Контакт успешно удален', 'success');
+        await loadContacts();
+
+    } catch (error) {
+        console.error(error);
+        showMessage(`Ошибка удаления контакта: ${error.message}`, 'error');
+    }
 }
 
 function openOrderModal(id) {
@@ -535,7 +889,9 @@ async function createOrder(event) {
         carrier: formData.get('carrier'),
         clientRate: parseFloat(formData.get('clientRate')),
         carrierRate: parseFloat(formData.get('carrierRate')),
-        vehicleBodyType: formData.get('vehicleBodyType') || null
+        vehicleBodyType: formData.get('vehicleBodyType') || null,
+        packageType: formData.get('packageType') || null,
+        loadingType: formData.get('loadingType') || null
     };
 
     try {
@@ -575,7 +931,9 @@ async function updateOrder() {
         dateUnloading: document.getElementById('editDateUnloading').value,
         clientRate: parseFloat(document.getElementById('editClientRate').value),
         carrierRate: parseFloat(document.getElementById('editCarrierRate').value),
-        vehicleBodyType: document.getElementById('editVehicleBodyType')?.value || null
+        vehicleBodyType: document.getElementById('editVehicleBodyType')?.value || null,
+        packageType: document.getElementById('editPackageType')?.value || null,
+        loadingType: document.getElementById('editLoadingType')?.value || null
     };
 
     try {

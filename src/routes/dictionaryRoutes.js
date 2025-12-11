@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const dictionaryController = require('../controllers/dictionaryController');
 
+// POST /api/dictionaries/seed - Заполнить все справочники
+router.post('/seed', dictionaryController.seedDictionaries);
+
 // POST /api/dictionaries/seed/vehicle-body-types - Заполнить справочник типов кузова
 router.post('/seed/vehicle-body-types', dictionaryController.seedVehicleBodyTypes);
 

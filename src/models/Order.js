@@ -35,6 +35,18 @@ const orderSchema = new mongoose.Schema({
         ref: 'VehicleBodyType'
     },
 
+    // Тип упаковки
+    packageType: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PackageType'
+    },
+
+    // Тип загрузки
+    loadingType: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'LoadingType'
+    },
+
     // Финансы
     clientRate: { type: Number },
     carrierRate: { type: Number },
