@@ -14,15 +14,10 @@ import { modalView } from '../views/ModalView.js';
  */
 export async function loadClients() {
     const tbody = document.getElementById('clientsTableBody');
-    if (!tbody) {
-        console.warn('⚠️ clientsTableBody не найден в DOM');
-        return;
-    }
+    if (!tbody) return;
 
     try {
-        console.log('📥 Загрузка клиентов...');
         const clients = await fetchClients();
-        console.log(`✅ Загружено клиентов: ${clients.length}`);
         appState.setClients(clients);
 
         tbody.innerHTML = '';

@@ -141,8 +141,20 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                             </select>
                         </div>
                         <div class="form-group">
+                            <label>Контактное лицо</label>
+                            <select name="carrierContact" id="carrierContactSelect">
+                                <option value="">Сначала выберите перевозчика</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label>Ставка перевозчика (₽)</label>
                             <input type="number" name="carrierRate" id="carrier_rate" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <!-- Пустое место для симметрии -->
                         </div>
                     </div>
                 </div>

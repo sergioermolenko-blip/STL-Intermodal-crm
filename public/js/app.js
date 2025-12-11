@@ -92,8 +92,6 @@ async function deleteItem(type, id) {
 // ============================================
 
 async function init() {
-    console.log('🚀 STL Intermodal CRM - Инициализация...');
-
     // Загрузка данных
     await dictionaryManager.loadDictionaries();
     await clientManager.loadClients();

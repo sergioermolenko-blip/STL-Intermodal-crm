@@ -108,6 +108,32 @@ export async function saveCarrier() {
 }
 
 /**
+ * Загрузить контакты перевозчика для формы заказа
+ */
+export async function loadCarrierContacts() {
+    const carrierSelect = document.getElementById('carrier');
+    const contactSelect = document.getElementById('carrierContact');
+
+    if (!carrierSelect || !contactSelect) return;
+
+    const carrierId = carrierSelect.value;
+    contactSelect.innerHTML = '<option value="">Выберите контакт (опционально)</option>';
+
+    if (!carrierId) return;
+
+    const carrierContacts = appState.contacts.filter(c =>
+        c.carrier?._id === carrierId || c.carrier === carrierId
+    );
+
+    carrierContacts.forEach(contact => {
+        const option = document.createElement('option');
+        option.value = contact._id;
+        option.textContent = `${contact.fullName} (${contact.phones[0]})`;
+        contactSelect.appendChild(option);
+    });
+}
+
+/**
  * Инициализация модуля
  */
 export function init() {
@@ -115,11 +141,17 @@ export function init() {
     if (btnAddCarrier) {
         btnAddCarrier.addEventListener('click', () => openCarrierModal(null, null));
     }
+
+    const carrierSelect = document.getElementById('carrier');
+    if (carrierSelect) {
+        carrierSelect.addEventListener('change', loadCarrierContacts);
+    }
 }
 
 export const carrierManager = {
     init,
     loadCarriers,
     openCarrierModal,
-    saveCarrier
+    saveCarrier,
+    loadCarrierContacts
 };
