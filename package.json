@@ -6,7 +6,13 @@
     "scripts": {
         "start": "node server.js",
         "dev": "nodemon server.js",
-        "seed": "node seed.js"
+        "seed": "node seed.js",
+        "test": "vitest",
+        "test:unit": "vitest run",
+        "test:unit:watch": "vitest",
+        "test:e2e": "playwright test",
+        "test:e2e:ui": "playwright test --ui",
+        "test:all": "npm run test:unit && npm run test:e2e"
     },
     "keywords": [
         "crm",
@@ -22,6 +28,10 @@
         "mongoose": "^8.20.2"
     },
     "devDependencies": {
-        "nodemon": "^3.1.11"
+        "nodemon": "^3.1.11",
+        "vitest": "^1.0.4",
+        "jsdom": "^23.0.1",
+        "@playwright/test": "^1.40.1",
+        "@vitest/ui": "^1.0.4"
     }
 }

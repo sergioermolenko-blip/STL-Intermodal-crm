@@ -1,0 +1,137 @@
+/* ============================================
+   BUTTONS - Component (Factory Pattern)
+   ============================================ */
+
+/* Base Button */
+.btn {
+    padding: var(--space-0-875) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+}
+
+/* Button Variants */
+.btn--primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn--primary:active {
+    transform: translateY(0);
+}
+
+.btn--secondary {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn--secondary:hover {
+    background: var(--border-dark);
+}
+
+/* Button Sizes */
+.btn--small {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-0-9);
+}
+
+.btn--large {
+    min-width: 200px;
+    height: var(--input-height-large);
+    padding: 0 1.75rem;
+    font-size: 15px;
+    font-weight: var(--font-semibold);
+}
+
+/* Icon Buttons */
+.btn--icon {
+    padding: var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-base);
+    font-size: var(--text-lg);
+    background: transparent;
+}
+
+.btn--icon.btn--edit {
+    color: var(--primary-color);
+}
+
+.btn--icon.btn--edit:hover {
+    background: var(--primary-light);
+}
+
+.btn--icon.btn--delete {
+    color: var(--error-color);
+}
+
+.btn--icon.btn--delete:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Legacy class support (for backward compatibility) */
+.btn-primary {
+    @extend .btn, .btn--primary;
+}
+
+.btn-secondary {
+    @extend .btn, .btn--secondary;
+}
+
+.btn-small {
+    @extend .btn, .btn--small;
+}
+
+.btn-large {
+    @extend .btn, .btn--large;
+}
+
+.btn-icon {
+    @extend .btn--icon;
+}
+
+.btn-edit {
+    @extend .btn--icon, .btn--edit;
+}
+
+.btn-delete {
+    @extend .btn--icon, .btn--delete;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+}
+
+/* Remove Phone Button (specific) */
+.btn-remove-phone {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space-0-75);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--text-base);
+}
+
+.btn-remove-phone:hover {
+    background: var(--error-dark);
+}

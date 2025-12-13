@@ -1,0 +1,58 @@
+/* ============================================
+   MAIN CONTENT - Layout Component
+   ============================================ */
+
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    padding: var(--space-xl);
+    background: var(--bg-color);
+}
+
+/* Section Header */
+.section-header {
+    margin-bottom: var(--space-xl);
+}
+
+.section-header h1 {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.section-subtitle {
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+}
+
+/* Content Sections */
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+.content-section.hidden {
+    display: none;
+}
+
+/* Responsive Main Content */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: var(--sidebar-width-tablet);
+        padding: var(--space-md);
+    }
+
+    .section-header h1 {
+        font-size: var(--text-2xl);
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        margin-left: var(--sidebar-width-mobile);
+    }
+}

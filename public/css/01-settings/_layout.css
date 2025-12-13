@@ -1,0 +1,39 @@
+/* ============================================
+   LAYOUT - Design Tokens
+   ============================================ */
+
+:root {
+    /* Sidebar */
+    --sidebar-width: 250px;
+    --sidebar-width-tablet: 200px;
+    --sidebar-width-mobile: 60px;
+
+    /* Content */
+    --content-max-width: 1200px;
+    --form-max-width: 800px;
+    --modal-max-width: 500px;
+
+    /* Form Inputs */
+    --input-height: 38px;
+    --input-height-large: 42px;
+
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.2s ease;
+    --transition-slow: 0.3s ease;
+
+    /* Z-index Scale */
+    --z-base: 1;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 900;
+    --z-modal: 1000;
+
+    /* Breakpoints (for reference in media queries) */
+    /* Use these values in @media queries */
+    /* --breakpoint-sm: 480px; */
+    /* --breakpoint-md: 768px; */
+    /* --breakpoint-lg: 1024px; */
+    /* --breakpoint-xl: 1280px; */
+}

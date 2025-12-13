@@ -1,0 +1,139 @@
+/* ============================================
+   CONTACTS - Feature-Specific Styles
+   ============================================ */
+
+/* Contacts List Grid */
+.contacts-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: var(--space-lg);
+    padding: var(--space-md) 0;
+}
+
+/* Contact Card Header */
+.contact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-0-75);
+    border-bottom: 2px solid var(--gray-300);
+}
+
+.contact-name {
+    font-size: var(--text-1-1);
+    font-weight: var(--font-semibold);
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+/* Status Badge */
+.status-badge {
+    font-size: var(--text-xs);
+    padding: 0.25rem var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-weight: var(--font-medium);
+}
+
+.status-badge.inactive {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* Contact Actions */
+.contact-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* Contact Body */
+.contact-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.contact-company {
+    font-weight: var(--font-medium);
+    color: var(--gray-600);
+    margin-bottom: var(--space-sm);
+}
+
+.contact-phone,
+.contact-email {
+    color: var(--gray-500);
+    font-size: var(--text-0-95);
+}
+
+.contact-notes {
+    margin-top: var(--space-sm);
+    padding: var(--space-0-75);
+    background: var(--gray-100);
+    border-left: 3px solid #2196F3;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-0-9);
+    color: var(--gray-600);
+    font-style: italic;
+}
+
+/* Company Contacts Section (in modals) */
+.company-contacts-section {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 2px solid var(--border-color);
+}
+
+.company-contacts-section h3 {
+    font-size: var(--text-1-1);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+}
+
+.company-contacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-0-75);
+    margin-bottom: var(--space-md);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.company-contact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-0-75);
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: var(--transition-base);
+}
+
+.company-contact-item:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color);
+}
+
+.company-contact-info {
+    flex: 1;
+}
+
+.company-contact-name {
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.company-contact-details {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.company-contact-actions {
+    display: flex;
+    gap: var(--space-sm);
+}

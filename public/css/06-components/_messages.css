@@ -1,0 +1,59 @@
+/* ============================================
+   MESSAGES - Component
+   ============================================ */
+
+.message {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-lg);
+    font-weight: var(--font-medium);
+    animation: slideIn var(--transition-slow);
+}
+
+.message.hidden {
+    display: none;
+}
+
+.message.success {
+    background: var(--success-light);
+    color: var(--success-dark);
+    border-left: 4px solid var(--success-color);
+}
+
+.message.error {
+    background: var(--error-light);
+    color: var(--error-dark);
+    border-left: 4px solid var(--error-color);
+}
+
+/* Loading and Empty States */
+.loading {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-xl);
+    font-style: italic;
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-2xl) var(--space-md);
+}
+
+.empty-state-icon {
+    font-size: var(--text-3xl);
+    margin-bottom: var(--space-md);
+    opacity: 0.5;
+}
+
+.no-data,
+.error {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.error {
+    color: var(--error-color);
+}

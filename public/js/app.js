@@ -50,6 +50,20 @@ function setupEventListeners() {
     }
 }
 
+/**
+ * Обработчик кликов по таблицам клиентов и перевозчиков
+ * 
+ * Использует делегирование событий для обработки кликов на кнопках
+ * редактирования и удаления в таблицах. Определяет тип действия
+ * по классу кнопки и вызывает соответствующую функцию.
+ * 
+ * @param {Event} event - Событие клика
+ * @param {string} type - Тип сущности ('client' или 'carrier')
+ * 
+ * @example
+ * // Используется в setupEventListeners
+ * clientsTableBody.addEventListener('click', (e) => handleTableClick(e, 'client'));
+ */
 function handleTableClick(event, type) {
     const editBtn = event.target.closest('.btn-edit');
     const deleteBtn = event.target.closest('.btn-delete');

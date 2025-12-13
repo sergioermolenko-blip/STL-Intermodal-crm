@@ -1,0 +1,67 @@
+/* ============================================
+   STL ITERMODAL CRM - Main Stylesheet
+   Modular CSS Architecture (ITCSS)
+   ============================================ */
+
+/* 01 - SETTINGS: Design tokens and variables */
+@import url('/css/01-settings/_colors.css');
+@import url('/css/01-settings/_spacing.css');
+@import url('/css/01-settings/_typography.css');
+@import url('/css/01-settings/_layout.css');
+
+/* 02 - TOOLS: Mixins and functions (utility classes) */
+/* Tools will be added as needed */
+
+/* 03 - GENERIC: Reset and normalize */
+@import url('/css/03-generic/_reset.css');
+
+/* 04 - ELEMENTS: Base HTML element styles */
+@import url('/css/04-elements/_body.css');
+
+/* 05 - LAYOUT: Major layout components */
+@import url('/css/05-layout/_app-container.css');
+@import url('/css/05-layout/_sidebar.css');
+@import url('/css/05-layout/_main-content.css');
+
+/* 06 - COMPONENTS: Reusable UI components */
+@import url('/css/06-components/_buttons.css');
+@import url('/css/06-components/_cards.css');
+@import url('/css/06-components/_forms.css');
+@import url('/css/06-components/_tables.css');
+@import url('/css/06-components/_modals.css');
+@import url('/css/06-components/_messages.css');
+
+/* 07 - FEATURES: Feature-specific styles */
+@import url('/css/07-features/_orders.css');
+@import url('/css/07-features/_contacts.css');
+
+/* 08 - UTILITIES: Helper classes */
+@import url('/css/08-utilities/_helpers.css');
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
