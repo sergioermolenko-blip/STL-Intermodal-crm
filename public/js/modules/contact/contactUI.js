@@ -1,6 +1,6 @@
 /**
  * Contact UI Rendering
- * Отвечает за рендеринг списка контактов и карточек
+ * Отвечает за рендеринг списка контактов в виде таблицы
  */
 
 import { formatDate } from '../../utils/formHelpers.js';
@@ -8,70 +8,49 @@ import { formatDate } from '../../utils/formHelpers.js';
 /**
  * Отрендерить список контактов
  * @param {Array} contacts - Массив контактов
- * @param {HTMLElement} container - Контейнер для рендеринга
+ * @param {HTMLElement} tbody - Tbody элемент таблицы для рендеринга
  */
-export function renderContactsList(contacts, container) {
-    if (!container) return;
+export function renderContactsList(contacts, tbody) {
+    if (!tbody) return;
 
-    container.innerHTML = '';
+    tbody.innerHTML = '';
 
     if (contacts.length === 0) {
-        container.innerHTML = '<div class="no-data">Нет контактов</div>';
+        tbody.innerHTML = '<tr><td colspan="7" class="no-data">Нет контактов</td></tr>';
         return;
     }
 
     contacts.forEach(contact => {
-        const card = renderContactCard(contact);
-        container.appendChild(card);
+        const row = renderContactRow(contact);
+        tbody.appendChild(row);
     });
 }
 
 /**
- * Отрендерить карточку контакта
+ * Отрендерить строку контакта
  * @param {Object} contact - Данные контакта
- * @returns {HTMLElement} DOM элемент карточки
+ * @returns {HTMLElement} DOM элемент строки таблицы
  */
-export function renderContactCard(contact) {
-    const card = document.createElement('div');
-    card.className = 'contact-card';
+export function renderContactRow(contact) {
+    const tr = document.createElement('tr');
 
-    const companyName = contact.client?.name || contact.carrier?.name || 'Не указано';
-    const companyType = contact.client ? 'Клиент' : contact.carrier ? 'Перевозчик' : '';
+    const companyName = contact.client?.name || contact.carrier?.name || '-';
+    const companyType = contact.client ? 'Клиент' : contact.carrier ? 'Перевозчик' : '-';
+    const status = contact.isActive ? '✅ Активен' : '❌ Неактивен';
+    const phones = contact.phones && contact.phones.length > 0 ? contact.phones.join(', ') : '-';
 
-    card.innerHTML = `
-        <div class="contact-header">
-            <div class="contact-name">${contact.fullName}</div>
-            <div class="contact-actions">
-                <button class="btn-icon btn-edit-contact" data-id="${contact._id}">✏️</button>
-                <button class="btn-icon btn-delete-contact" data-id="${contact._id}">🗑️</button>
-            </div>
-        </div>
-        <div class="contact-body">
-            <div class="contact-info">
-                <div class="contact-field">
-                    <span class="contact-label">📞 Телефон:</span>
-                    <span>${contact.phones.join(', ')}</span>
-                </div>
-                <div class="contact-field">
-                    <span class="contact-label">✉️ Email:</span>
-                    <span>${contact.email}</span>
-                </div>
-                <div class="contact-field">
-                    <span class="contact-label">🏢 Компания:</span>
-                    <span>${companyName} ${companyType ? `(${companyType})` : ''}</span>
-                </div>
-                ${contact.notes ? `
-                    <div class="contact-field">
-                        <span class="contact-label">📝 Комментарии:</span>
-                        <span>${contact.notes}</span>
-                    </div>
-                ` : ''}
-            </div>
-            <div class="contact-status ${contact.isActive ? 'active' : 'inactive'}">
-                ${contact.isActive ? '✅ Активен' : '❌ Неактивен'}
-            </div>
-        </div>
+    tr.innerHTML = `
+        <td>${contact.fullName || '-'}</td>
+        <td>${phones}</td>
+        <td>${contact.email || '-'}</td>
+        <td>${companyName}</td>
+        <td>${companyType}</td>
+        <td>${status}</td>
+        <td class="actions">
+            <button class="btn-icon btn-edit-contact" data-id="${contact._id}">✏️</button>
+            <button class="btn-icon btn-delete-contact" data-id="${contact._id}">🗑️</button>
+        </td>
     `;
 
-    return card;
+    return tr;
 }

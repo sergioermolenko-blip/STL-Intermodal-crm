@@ -8,6 +8,7 @@ import { contactManager } from './modules/contactManager.js';
 import { orderManager } from './modules/orderManager.js';
 import { showMessage } from './utils/messageHelper.js';
 import { deleteClient, deleteCarrier } from './utils/api.js';
+import { modalView } from './views/ModalView.js';
 
 // ============================================
 // НАВИГАЦИЯ
@@ -65,8 +66,10 @@ function setupEventListeners() {
  * clientsTableBody.addEventListener('click', (e) => handleTableClick(e, 'client'));
  */
 function handleTableClick(event, type) {
+    console.log('🔥 CLICK DETECTED!', { type, target: event.target, tagName: event.target.tagName, className: event.target.className });
     const editBtn = event.target.closest('.btn-edit');
     const deleteBtn = event.target.closest('.btn-delete');
+    console.log('🔥 Buttons found:', { editBtn, deleteBtn });
 
     if (editBtn) {
         const id = editBtn.dataset.id;
@@ -77,13 +80,22 @@ function handleTableClick(event, type) {
         }
     } else if (deleteBtn) {
         const id = deleteBtn.dataset.id;
+        console.log('🔥 CALLING deleteItem with:', { type, id });
         deleteItem(type, id);
     }
 }
 
 async function deleteItem(type, id) {
     const itemName = type === 'client' ? 'клиента' : 'перевозчика';
-    if (!confirm(`Вы уверены, что хотите удалить ${itemName}?`)) return;
+    console.log('🔥 About to show confirm dialog for:', itemName);
+
+    // Используем кастомный confirm вместо нативного
+    const confirmed = await modalView.showConfirm(`Вы уверены, что хотите удалить ${itemName}?`);
+    console.log('🔥 Confirm result:', confirmed);
+    if (!confirmed) {
+        console.log('🔥 User cancelled deletion');
+        return;
+    }
 
     try {
         if (type === 'client') {
@@ -106,21 +118,21 @@ async function deleteItem(type, id) {
 // ============================================
 
 async function init() {
+    // Настройка навигации и событий СНАЧАЛА
+    setupNavigation();
+    setupEventListeners();
+
     // Загрузка данных
     await dictionaryManager.loadDictionaries();
     await clientManager.loadClients();
     await carrierManager.loadCarriers();
     await contactManager.loadContacts();
 
-    // Инициализация модулей
+    // Инициализация модулей ПОСЛЕ загрузки данных
     orderManager.init();
     clientManager.init();
     carrierManager.init();
     contactManager.init();
-
-    // Настройка навигации и событий
-    setupNavigation();
-    setupEventListeners();
 
     // Загрузка заказов
     orderManager.loadOrders();
@@ -128,3 +140,4 @@ async function init() {
 
 // Запуск приложения
 init();
+

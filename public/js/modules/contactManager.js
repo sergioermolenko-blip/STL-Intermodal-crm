@@ -12,14 +12,14 @@ import { handleContactClick, setupCompanyContactHandlers, initContactHandlers } 
  * Загрузить и отобразить список контактов
  */
 export async function loadContacts() {
-    const contactsList = document.getElementById('contactsList');
-    if (!contactsList) return;
+    const contactsTableBody = document.getElementById('contactsTableBody');
+    if (!contactsTableBody) return;
 
     try {
         const contacts = await loadContactsData();
-        renderContactsList(contacts, contactsList);
+        renderContactsList(contacts, contactsTableBody);
     } catch (error) {
-        contactsList.innerHTML = '<div class="error">Ошибка загрузки контактов</div>';
+        contactsTableBody.innerHTML = '<tr><td colspan="7" class="error">Ошибка загрузки контактов</td></tr>';
     }
 }
 

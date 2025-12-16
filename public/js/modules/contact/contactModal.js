@@ -7,6 +7,7 @@ import { appState } from '../../state/appState.js';
 import { renderContactForm } from '../../views/ContactFormView.js';
 import { modalView } from '../../views/ModalView.js';
 import { saveContact } from './contactCRUD.js';
+import { loadContacts } from '../contactManager.js';
 
 /**
  * Открыть модальное окно контакта
@@ -19,7 +20,7 @@ export function openContactModal(id) {
 
     modalView.showForm(title, formHTML, async (event) => {
         event.preventDefault();
-        await saveContact();
+        await saveContact(loadContacts);
     });
 
     setupPhoneDynamicFields();
@@ -37,7 +38,7 @@ export function openContactModalForCompany(type, companyId) {
 
     modalView.showForm(title, formHTML, async (event) => {
         event.preventDefault();
-        await saveContact();
+        await saveContact(loadContacts);
     });
 
     setTimeout(() => {

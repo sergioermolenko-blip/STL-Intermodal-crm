@@ -2,82 +2,9 @@
    CONTACTS - Feature-Specific Styles
    ============================================ */
 
-/* Contacts List Grid */
-.contacts-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: var(--space-lg);
-    padding: var(--space-md) 0;
-}
-
-/* Contact Card Header */
-.contact-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--space-md);
-    padding-bottom: var(--space-0-75);
-    border-bottom: 2px solid var(--gray-300);
-}
-
-.contact-name {
-    font-size: var(--text-1-1);
-    font-weight: var(--font-semibold);
-    color: var(--gray-700);
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    flex-wrap: wrap;
-}
-
-/* Status Badge */
-.status-badge {
-    font-size: var(--text-xs);
-    padding: 0.25rem var(--space-sm);
-    border-radius: var(--radius-sm);
-    font-weight: var(--font-medium);
-}
-
-.status-badge.inactive {
-    background: #ffebee;
-    color: #c62828;
-}
-
-/* Contact Actions */
-.contact-actions {
-    display: flex;
-    gap: var(--space-sm);
-}
-
-/* Contact Body */
-.contact-body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-}
-
-.contact-company {
-    font-weight: var(--font-medium);
-    color: var(--gray-600);
-    margin-bottom: var(--space-sm);
-}
-
-.contact-phone,
-.contact-email {
-    color: var(--gray-500);
-    font-size: var(--text-0-95);
-}
-
-.contact-notes {
-    margin-top: var(--space-sm);
-    padding: var(--space-0-75);
-    background: var(--gray-100);
-    border-left: 3px solid #2196F3;
-    border-radius: var(--radius-sm);
-    font-size: var(--text-0-9);
-    color: var(--gray-600);
-    font-style: italic;
-}
+/* DEPRECATED: Contacts now use table layout (see _tables.css) */
+/* .contacts-list - removed, using .data-table instead */
+/* .contact-header, .contact-name, .contact-body - removed, using table rows */
 
 /* Company Contacts Section (in modals) */
 .company-contacts-section {

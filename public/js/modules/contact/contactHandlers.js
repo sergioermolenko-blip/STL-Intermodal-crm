@@ -5,6 +5,7 @@
 
 import { openContactModal } from './contactModal.js';
 import { deleteContact } from './contactCRUD.js';
+import { modalView } from '../../views/ModalView.js';
 
 /**
  * Обработчик кликов по контактам
@@ -30,6 +31,10 @@ export function handleContactClick(event, reloadCallback) {
  * @param {Function} reloadCallback - Функция для перезагрузки списка
  */
 async function handleDeleteContact(id, reloadCallback) {
+    // Confirm dialog перенесен сюда из contactCRUD.js
+    const confirmed = await modalView.showConfirm('Вы уверены, что хотите удалить этот контакт?');
+    if (!confirmed) return;
+
     const success = await deleteContact(id);
     if (success && reloadCallback) {
         reloadCallback();
@@ -81,8 +86,8 @@ export function initContactHandlers(openModalCallback, handleClickCallback) {
         btnAddContact.addEventListener('click', () => openModalCallback(null));
     }
 
-    const contactsList = document.getElementById('contactsList');
-    if (contactsList) {
-        contactsList.addEventListener('click', handleClickCallback);
+    const contactsTableBody = document.getElementById('contactsTableBody');
+    if (contactsTableBody) {
+        contactsTableBody.addEventListener('click', handleClickCallback);
     }
 }

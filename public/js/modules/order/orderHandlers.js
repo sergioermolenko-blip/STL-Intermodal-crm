@@ -57,6 +57,9 @@ export function handleOrderClick(event, reloadCallback) {
  * @param {Function} reloadCallback - Функция для перезагрузки списка
  */
 async function handleDeleteOrder(id, reloadCallback) {
+    const confirmed = await modalView.showConfirm('Вы уверены, что хотите удалить этот заказ?');
+    if (!confirmed) return;
+
     const success = await deleteOrder(id);
     if (success && reloadCallback) {
         reloadCallback();

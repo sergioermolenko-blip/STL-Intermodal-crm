@@ -68,7 +68,7 @@ test.describe('Navigation', () => {
         await contactsButton.click();
 
         await page.waitForSelector('#contacts-section.active', { timeout: 5000 });
-        await expect(page.locator('#contactsList')).toBeVisible();
+        await expect(page.locator('#contactsTableBody')).toBeVisible();
     });
 
     test('should navigate between all sections', async ({ page }) => {

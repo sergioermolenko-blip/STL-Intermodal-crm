@@ -102,4 +102,72 @@ test.describe('Clients CRUD', () => {
         // Проверяем, что модальное окно закрылось
         await expect(page.locator('.modal')).not.toBeVisible();
     });
+
+    test('should delete a client', async ({ page }) => {
+        await page.goto('/');
+        await waitForAppReady(page);
+
+        await page.click('button[data-section="clients-section"]');
+        await page.waitForSelector('#clients-section.active');
+
+        // Создаем клиента для удаления
+        await page.click('#btnAddClient');
+        const timestamp = Date.now();
+        await page.fill('#clientName', `Test Client ${timestamp}`);
+        await page.fill('#clientInn', `${timestamp}`.slice(0, 10));
+        await page.fill('#clientContactPerson', 'Тест Тестов');
+        await page.fill('#clientPhone', '+79991234567');
+        await page.fill('#clientEmail', `test${timestamp}@example.com`);
+        await page.click('.modal button[data-submit="true"]');
+        await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+
+        // Проверяем, что клиент появился
+        await expect(page.locator(`text=Test Client ${timestamp}`)).toBeVisible();
+
+        // Кликаем на кнопку удаления
+        const deleteBtn = page.locator(`tr:has-text("Test Client ${timestamp}") .btn-delete`).first();
+        await deleteBtn.click();
+
+        // Ожидаем появления кастомного модального окна подтверждения
+        await expect(page.locator('.modal')).toBeVisible({ timeout: 3000 });
+        await expect(page.locator('text=Подтверждение')).toBeVisible();
+
+        // Подтверждаем удаление
+        await page.click('button[data-confirm-ok="true"]');
+
+        // Проверяем, что клиент исчез из списка
+        await expect(page.locator(`text=Test Client ${timestamp}`)).not.toBeVisible({ timeout: 5000 });
+    });
+
+    test('should cancel deletion when clicking Cancel', async ({ page }) => {
+        await page.goto('/');
+        await waitForAppReady(page);
+
+        await page.click('button[data-section="clients-section"]');
+        await page.waitForSelector('#clients-section.active');
+
+        // Создаем клиента
+        await page.click('#btnAddClient');
+        const timestamp = Date.now();
+        await page.fill('#clientName', `Test Client ${timestamp}`);
+        await page.fill('#clientInn', `${timestamp}`.slice(0, 10));
+        await page.fill('#clientContactPerson', 'Тест Тестов');
+        await page.fill('#clientPhone', '+79991234567');
+        await page.fill('#clientEmail', `test${timestamp}@example.com`);
+        await page.click('.modal button[data-submit="true"]');
+        await expect(page.locator('.modal')).not.toBeVisible({ timeout: 5000 });
+
+        // Кликаем на кнопку удаления
+        const deleteBtn = page.locator(`tr:has-text("Test Client ${timestamp}") .btn-delete`).first();
+        await deleteBtn.click();
+
+        // Ожидаем появления модального окна подтверждения
+        await expect(page.locator('.modal')).toBeVisible({ timeout: 3000 });
+
+        // Отменяем удаление
+        await page.click('button[data-confirm-cancel="true"]');
+
+        // Проверяем, что клиент НЕ удален
+        await expect(page.locator(`text=Test Client ${timestamp}`)).toBeVisible();
+    });
 });

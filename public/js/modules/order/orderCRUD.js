@@ -77,10 +77,9 @@ export async function updateOrder() {
 /**
  * Удалить заказ
  * @param {string} id - ID заказа
+ * @returns {Promise<boolean>} true если успешно, false если ошибка
  */
 export async function deleteOrder(id) {
-    if (!confirm('Вы уверены, что хотите удалить этот заказ?')) return false;
-
     try {
         await apiDeleteOrder(id);
         showMessage('Заказ успешно удален!', 'success');

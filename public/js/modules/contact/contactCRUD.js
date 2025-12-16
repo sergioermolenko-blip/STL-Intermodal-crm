@@ -25,8 +25,9 @@ export async function loadContactsData() {
 
 /**
  * Сохранить контакт (создать или обновить)
+ * @param {Function} reloadCallback - Callback для перезагрузки списка контактов
  */
-export async function saveContact() {
+export async function saveContact(reloadCallback) {
     const id = document.getElementById('contactId').value;
     const form = document.getElementById('contactForm');
     const formData = new FormData(form);
@@ -60,6 +61,11 @@ export async function saveContact() {
         showMessage(`Контакт успешно ${id ? 'обновлен' : 'создан'}!`, 'success');
         modalView.close();
 
+        // Перезагружаем список контактов
+        if (reloadCallback) {
+            reloadCallback();
+        }
+
         // Возвращаем true для индикации успеха
         return true;
     } catch (error) {
@@ -72,10 +78,9 @@ export async function saveContact() {
 /**
  * Удалить контакт
  * @param {string} id - ID контакта
+ * @returns {Promise<boolean>} true если успешно, false если ошибка
  */
 export async function deleteContact(id) {
-    if (!confirm('Вы уверены, что хотите удалить этот контакт?')) return false;
-
     try {
         await apiDeleteContact(id);
         showMessage('Контакт успешно удален!', 'success');

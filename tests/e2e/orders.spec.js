@@ -116,4 +116,102 @@ test.describe('Orders', () => {
         // Проверяем, что прибыль отображается (25000) - используем .first()
         await expect(page.locator('#ordersList .finance-value:has-text("25")').first()).toBeVisible({ timeout: 5000 });
     });
+
+    test('should delete an order', async ({ page }) => {
+        await page.goto('/');
+
+        // Ждем, пока форма заказа загрузится
+        await page.waitForSelector('#createOrderForm', { timeout: 10000 });
+        await page.waitForSelector('#route_from:visible');
+
+        // Создаем заказ для удаления
+        const timestamp = Date.now();
+        await page.fill('#route_from', `Тест А ${timestamp}`);
+        await page.fill('#route_to', `Тест Б ${timestamp}`);
+        await page.fill('#cargo_name', 'Тестовый груз');
+        await page.fill('#cargo_weight', '1000');
+
+        const today = new Date().toISOString().split('T')[0];
+        await page.fill('#date_loading', today);
+        await page.fill('#date_unloading', today);
+
+        await page.waitForSelector('#clientSelect option:not([value=""])', { state: 'attached', timeout: 10000 });
+        await page.waitForSelector('#carrierSelect option:not([value=""])', { state: 'attached', timeout: 10000 });
+        await page.selectOption('#clientSelect', { index: 1 });
+        await page.selectOption('#carrierSelect', { index: 1 });
+
+        await page.waitForSelector('#vehicleBodyType option:not([value=""])', { state: 'attached', timeout: 10000 });
+        await page.selectOption('#vehicleBodyType', { index: 1 });
+
+        await page.fill('#client_rate', '50000');
+        await page.fill('#carrier_rate', '40000');
+
+        await page.click('#createOrderForm button[type="submit"]');
+
+        // Ждем появления заказа в списке
+        await page.waitForSelector('#ordersList .order-card', { timeout: 10000 });
+        await expect(page.locator(`#ordersList .order-route:has-text("Тест А ${timestamp}")`).first()).toBeVisible({ timeout: 5000 });
+
+        // Кликаем на кнопку удаления
+        const deleteBtn = page.locator(`.order-card:has-text("Тест А ${timestamp}") .btn-delete-order`).first();
+        await deleteBtn.click();
+
+        // Ожидаем появления кастомного модального окна подтверждения
+        await expect(page.locator('.modal')).toBeVisible({ timeout: 3000 });
+        await expect(page.locator('text=Подтверждение')).toBeVisible();
+
+        // Подтверждаем удаление
+        await page.click('button[data-confirm-ok="true"]');
+
+        // Проверяем, что заказ исчез из списка
+        await expect(page.locator(`#ordersList .order-route:has-text("Тест А ${timestamp}")`)).not.toBeVisible({ timeout: 5000 });
+    });
+
+    test('should cancel deletion when clicking Cancel', async ({ page }) => {
+        await page.goto('/');
+
+        // Ждем, пока форма заказа загрузится
+        await page.waitForSelector('#createOrderForm', { timeout: 10000 });
+        await page.waitForSelector('#route_from:visible');
+
+        // Создаем заказ
+        const timestamp = Date.now();
+        await page.fill('#route_from', `Тест А ${timestamp}`);
+        await page.fill('#route_to', `Тест Б ${timestamp}`);
+        await page.fill('#cargo_name', 'Тестовый груз');
+        await page.fill('#cargo_weight', '1000');
+
+        const today = new Date().toISOString().split('T')[0];
+        await page.fill('#date_loading', today);
+        await page.fill('#date_unloading', today);
+
+        await page.waitForSelector('#clientSelect option:not([value=""])', { state: 'attached', timeout: 10000 });
+        await page.waitForSelector('#carrierSelect option:not([value=""])', { state: 'attached', timeout: 10000 });
+        await page.selectOption('#clientSelect', { index: 1 });
+        await page.selectOption('#carrierSelect', { index: 1 });
+
+        await page.waitForSelector('#vehicleBodyType option:not([value=""])', { state: 'attached', timeout: 10000 });
+        await page.selectOption('#vehicleBodyType', { index: 1 });
+
+        await page.fill('#client_rate', '50000');
+        await page.fill('#carrier_rate', '40000');
+
+        await page.click('#createOrderForm button[type="submit"]');
+
+        // Ждем появления заказа в списке
+        await page.waitForSelector('#ordersList .order-card', { timeout: 10000 });
+
+        // Кликаем на кнопку удаления
+        const deleteBtn = page.locator(`.order-card:has-text("Тест А ${timestamp}") .btn-delete-order`).first();
+        await deleteBtn.click();
+
+        // Ожидаем появления модального окна подтверждения
+        await expect(page.locator('.modal')).toBeVisible({ timeout: 3000 });
+
+        // Отменяем удаление
+        await page.click('button[data-confirm-cancel="true"]');
+
+        // Проверяем, что заказ НЕ удален
+        await expect(page.locator(`#ordersList .order-route:has-text("Тест А ${timestamp}")`).first()).toBeVisible();
+    });
 });

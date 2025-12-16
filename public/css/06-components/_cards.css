@@ -67,12 +67,17 @@
 }
 
 /* Legacy class support */
-.contact-card {
-    @extend .card--contact;
+.order-item {
+    padding: var(--space-1-25);
+    background: var(--bg-color);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary-color);
+    transition: var(--transition-base);
 }
 
-.order-item {
-    @extend .card--order;
+.order-item:hover {
+    background: var(--bg-secondary);
+    transform: translateX(4px);
 }
 
 /* Responsive Cards */

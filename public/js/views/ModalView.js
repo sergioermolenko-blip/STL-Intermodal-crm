@@ -103,6 +103,67 @@ class ModalView {
     }
 
     /**
+     * Показать диалог подтверждения (замена confirm)
+     * @param {string} message - Сообщение для подтверждения
+     * @returns {Promise<boolean>} true если подтверждено, false если отменено
+     */
+    showConfirm(message) {
+        return new Promise((resolve) => {
+            this.container = document.getElementById('modalContainer');
+
+            const modalHTML = `
+                <div id="dynamicModal" class="modal">
+                    <div class="modal-overlay"></div>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Подтверждение</h2>
+                        </div>
+                        <div class="modal-body">
+                            <p>${message}</p>
+                        </div>
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" data-confirm-cancel="true">Отмена</button>
+                            <button type="button" class="btn btn-danger" data-confirm-ok="true">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            this.container.innerHTML = modalHTML;
+
+            const modal = document.getElementById('dynamicModal');
+            const cancelBtn = modal.querySelector('[data-confirm-cancel="true"]');
+            const okBtn = modal.querySelector('[data-confirm-ok="true"]');
+
+            const cleanup = () => {
+                this.container.innerHTML = '';
+            };
+
+            cancelBtn.addEventListener('click', () => {
+                cleanup();
+                resolve(false);
+            });
+
+            okBtn.addEventListener('click', () => {
+                cleanup();
+                resolve(true);
+            });
+
+            // Закрытие по Escape = отмена
+            const escapeHandler = (e) => {
+                if (e.key === 'Escape') {
+                    cleanup();
+                    resolve(false);
+                    document.removeEventListener('keydown', escapeHandler);
+                }
+            };
+            document.addEventListener('keydown', escapeHandler);
+
+            modal.classList.remove('hidden');
+        });
+    }
+
+    /**
      * Закрыть модальное окно
      */
     close() {

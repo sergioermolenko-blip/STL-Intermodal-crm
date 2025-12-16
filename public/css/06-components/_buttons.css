@@ -87,31 +87,119 @@
 
 /* Legacy class support (for backward compatibility) */
 .btn-primary {
-    @extend .btn, .btn--primary;
+    padding: var(--space-0-875) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-secondary {
-    @extend .btn, .btn--secondary;
+    padding: var(--space-0-875) var(--space-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: var(--border-dark);
 }
 
 .btn-small {
-    @extend .btn, .btn--small;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-0-9);
 }
 
 .btn-large {
-    @extend .btn, .btn--large;
+    min-width: 200px;
+    height: var(--input-height-large);
+    padding: 0 1.75rem;
+    font-size: 15px;
+    font-weight: var(--font-semibold);
 }
 
 .btn-icon {
-    @extend .btn--icon;
+    padding: var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-base);
+    font-size: var(--text-lg);
+    background: transparent;
+}
+
+/* Prevent emoji from intercepting clicks */
+.btn-icon>* {
+    pointer-events: none;
 }
 
 .btn-edit {
-    @extend .btn--icon, .btn--edit;
+    padding: var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-base);
+    font-size: var(--text-lg);
+    background: transparent;
+    color: var(--primary-color);
+}
+
+.btn-edit>* {
+    pointer-events: none;
+}
+
+.btn-edit:hover {
+    background: var(--primary-light);
 }
 
 .btn-delete {
-    @extend .btn--icon, .btn--delete;
+    padding: var(--space-sm);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition-base);
+    font-size: var(--text-lg);
+    background: transparent;
+    color: var(--error-color);
+}
+
+.btn-delete>* {
+    pointer-events: none;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.1);
 }
 
 /* Action Buttons Container */
