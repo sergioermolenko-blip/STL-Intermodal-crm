@@ -1,85 +1,70 @@
-# 🌍 STL Intermodal CRM - Implementation Plan v2.0
+# 🌍 STL Intermodal CRM - Implementation Plan v2.1
 
 ## Концепция
 **Международная мультимодальная CRM** для экспедитора:
 - 🚛 Авто (FTL/LTL) | 🚂 ЖД | 🚢 Море (FCL/LCL) | ✈️ Авиа | 🔄 Мультимодал
 
-**Workflow:** см. [SHIPMENT_WORKFLOW.md](./SHIPMENT_WORKFLOW.md)
+**Документация:**
+- Workflow: [SHIPMENT_WORKFLOW.md](./SHIPMENT_WORKFLOW.md)
+- UI Design: [UI_DESIGN.md](./UI_DESIGN.md)
 
 ---
 
-## 🗄️ Новые модели базы данных
+## 🖥️ UI Архитектура
+
+### Master-Detail паттерн
+1. **Список заказов** - таблица с фильтрами
+2. **Карточка заказа** - детали + timeline статусов
+3. **Wizard-форма** - создание/редактирование заказа
+
+### Wizard-форма (5 секций)
+| Секция | Поля |
+|--------|------|
+| Клиент | Компания, контакт, инкотермс |
+| Маршрут | Откуда/куда, даты |
+| Груз | Описание, вес, объём, DG, температура |
+| Транспорт | Тип, требования |
+| Финансы | Ставка, валюта |
+
+---
+
+## 🗄️ Модели базы данных
 
 ### CarrierQuote (Котировка от перевозчика)
 ```javascript
 CarrierQuote {
-  id, shipmentId
-  carrierId, carrierContactId
-  
-  transportMode: ENUM ['auto','rail','sea','air']
-  rate: DECIMAL
-  currency: STRING
-  transitDays: INTEGER
-  validUntil: DATE
-  
-  status: ENUM ['requested','received','selected','rejected','expired']
-  notes: TEXT
-  routeDetails: JSON
-  createdAt, updatedAt
+  id, shipmentId, carrierId, carrierContactId
+  transportMode, rate, currency, transitDays, validUntil
+  status: ['requested','received','selected','rejected','expired']
+  notes, routeDetails: JSON
 }
 ```
 
 ### Proposal (КП для клиента)
 ```javascript
 Proposal {
-  id, shipmentId
-  proposalNumber: STRING  // "КП-2024-001234"
-  
+  id, shipmentId, proposalNumber
   clientId, clientContactId
-  
-  options: JSON  // [{name, rate, transitDays, carrierQuoteId}, ...]
-  selectedOptionIndex: INTEGER
-  
-  totalRate: DECIMAL
-  currency: STRING
-  margin: DECIMAL
-  marginPercent: DECIMAL
-  
-  status: ENUM ['draft','sent','approved','declined','expired']
-  validUntil: DATE
-  sentAt, approvedAt: DATETIME
-  notes: TEXT
+  options: JSON, selectedOptionIndex
+  totalRate, currency, margin, marginPercent
+  status: ['draft','sent','approved','declined','expired']
+  validUntil, sentAt, approvedAt, notes
 }
 ```
 
-### Shipment (обновлённый)
+### Shipment (обновлённый Order)
 ```javascript
 Shipment {
-  id, shipmentNumber  // "STL-2024-001234"
-  
-  // Статусы (из SHIPMENT_WORKFLOW.md)
-  status: ENUM [
-    'draft','inquiry','carrier_quote','quotes_received',
-    'proposal_draft','proposal_sent','client_approved',
-    'booking','confirmed',
-    'picked_up','export_customs','departed','in_transit',
-    'arrived','import_customs','partial','delivered',
-    'invoiced','paid','closed',
-    'expired','declined','cancelled','hold','problem','returned','lost'
-  ]
-  
-  transportMode: ENUM ['auto','rail','sea','air','multimodal','tbd']
-  direction: ENUM ['import','export','domestic','transit']
+  id, shipmentNumber
+  status: [25+ статусов - см. SHIPMENT_WORKFLOW.md]
+  transportMode: ['auto','rail','sea','air','multimodal','tbd']
+  direction: ['import','export','domestic','transit']
   incoterms, incotermsPlace
-  
   clientId, shipperId, consigneeId, notifyPartyId, billToId
   originCountry, originCity, originAddress
   destinationCountry, destinationCity, destinationAddress
-  
   clientRate, clientCurrency, totalCost, margin
   estimatedPickup, estimatedDelivery, actualPickup, actualDelivery
-  
-  selectedCarrierQuoteId, selectedProposalId
 }
 ```
 
@@ -88,41 +73,76 @@ Shipment {
 ## 📋 Фазы реализации
 
 ### Фаза 1: Статусы и основа (2-3 дня)
+**Backend:**
 - Добавить status, shipmentNumber, transportMode, direction в Order
-- UI: выбор статуса, цветной бейдж, кнопки смены
 
-### Фаза 2: Работа с перевозчиками (2-3 дня)
+**Frontend:**
+- Цветной бейдж статуса в списке
+- Timeline статусов в карточке
+- Кнопки смены статуса
+
+---
+
+### Фаза 2: Wizard-форма (3-4 дня)
+**Frontend:**
+- Wizard с сайдбаром (5 секций)
+- Сохранение черновика
+- Валидация полей
+
+**Backend:**
+- API для создания/редактирования заказа
+
+---
+
+### Фаза 3: CarrierQuote (2-3 дня)
+**Backend:**
 - Модель CarrierQuote
-- UI: запрос ставок, сравнение, выбор
+- API CRUD
 
-### Фаза 3: КП для клиента (2-3 дня)
+**Frontend:**
+- UI запроса ставок
+- Сравнение ставок
+- Выбор перевозчика
+
+---
+
+### Фаза 4: Proposal/КП (2-3 дня)
+**Backend:**
 - Модель Proposal
-- UI: создание КП, варианты, расчёт маржи
+- API CRUD
 
-### Фаза 4: Мультимодал (3-4 дня)
+**Frontend:**
+- UI создания КП
+- Расчёт маржи
+- Варианты (море vs авиа)
+
+---
+
+### Фаза 5: Мультимодал (3-4 дня)
 - Модель ShipmentLeg
 - UI добавления этапов
 
-### Фаза 5: Груз (2 дня)
+### Фаза 6: Груз (2 дня)
 - Модель Cargo (INTTRA стандарт)
 
-### Фаза 6: Контейнеры (2 дня)
+### Фаза 7: Контейнеры (2 дня)
 - Модель Container
 
-### Фаза 7: Таможня (2 дня)
+### Фаза 8: Таможня (2 дня)
 - Модель CustomsClearance
 
-### Фаза 8: Документы (3 дня)
+### Фаза 9: Документы (3 дня)
 - Модель ShipmentDocument, загрузка, PDF
 
-### Фаза 9: Финансы (2 дня)
+### Фаза 10: Финансы (2 дня)
 - Мультивалютность, P&L
 
 ---
 
 ## 🎯 Приоритет
 
-**Начать с Фаз 1-3:**
+**Начать с Фаз 1-4:**
 1. Статусы → Видимость workflow
-2. CarrierQuote → Работа с перевозчиками  
-3. Proposal → Работа с клиентами
+2. Wizard-форма → Удобное создание заказов
+3. CarrierQuote → Работа с перевозчиками  
+4. Proposal → Работа с клиентами

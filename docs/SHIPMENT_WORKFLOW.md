@@ -6,6 +6,10 @@ description: Полный жизненный цикл заказа (Shipment) д
 
 Полный жизненный цикл заказа для международного экспедитора.
 
+**Связанные документы:**
+- [IMPLEMENTATION_PLAN.md](./IMPLEMENTATION_PLAN.md) - План реализации
+- [UI_DESIGN.md](./UI_DESIGN.md) - UI дизайн
+
 ## Этапы workflow
 
 ### Этап 1: Работа с клиентом
