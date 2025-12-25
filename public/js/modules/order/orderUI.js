@@ -64,18 +64,18 @@ export function renderOrderCard(order) {
     orderCard.innerHTML = `
         <div class="order-header">
             <div class="order-route">
-                <strong>${order.route?.from || 'Не указано'}</strong> → <strong>${order.route?.to || 'Не указано'}</strong>
+                <strong>${order.routeFrom || 'Не указано'}</strong> → <strong>${order.routeTo || 'Не указано'}</strong>
             </div>
             <div class="order-actions">
-                <button class="btn-icon btn-edit-order" data-id="${order._id}">✏️</button>
-                <button class="btn-icon btn-delete-order" data-id="${order._id}">🗑️</button>
+                <button class="btn-icon btn-edit-order" data-id="${order.id}">✏️</button>
+                <button class="btn-icon btn-delete-order" data-id="${order.id}">🗑️</button>
             </div>
         </div>
         <div class="order-body">
             <div class="order-info">
                 <div class="info-item">
                     <span class="info-label">Груз:</span>
-                    <span class="info-value">${order.cargo?.name || 'Не указан'} (${order.cargo?.weight || 0} кг)</span>
+                    <span class="info-value">${order.cargoName || 'Не указан'} (${order.cargoWeight || 0} кг)</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Погрузка:</span>

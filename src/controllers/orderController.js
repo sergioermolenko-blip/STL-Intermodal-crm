@@ -1,16 +1,23 @@
 const Order = require('../models/Order');
 const Client = require('../models/Client');
 const Carrier = require('../models/Carrier');
+const VehicleBodyType = require('../models/VehicleBodyType');
+const PackageType = require('../models/PackageType');
+const LoadingType = require('../models/LoadingType');
+const Contact = require('../models/Contact');
 
 // Получить все заказы (с подтягиванием имен клиентов и перевозчиков)
 exports.getAllOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
-            .populate('client', 'name')
-            .populate('carrier', 'name')
-            .populate('vehicleBodyType', 'name')
-            .populate('clientContact', 'fullName phones email')
-            .sort({ createdAt: -1 });
+        const orders = await Order.findAll({
+            include: [
+                { model: Client, as: 'client', attributes: ['name'] },
+                { model: Carrier, as: 'carrier', attributes: ['name'] },
+                { model: VehicleBodyType, as: 'vehicleBodyType', attributes: ['name'] },
+                { model: Contact, as: 'clientContact', attributes: ['fullName', 'phones', 'email'] }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
         res.json(orders);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -25,7 +32,14 @@ exports.createOrder = async (req, res) => {
         const newOrder = await Order.create(req.body);
 
         // Подтягиваем связанные данные для ответа
-        await newOrder.populate('client carrier vehicleBodyType clientContact');
+        await newOrder.reload({
+            include: [
+                { model: Client, as: 'client' },
+                { model: Carrier, as: 'carrier' },
+                { model: VehicleBodyType, as: 'vehicleBodyType' },
+                { model: Contact, as: 'clientContact' }
+            ]
+        });
 
         res.status(201).json(newOrder);
 
@@ -38,11 +52,14 @@ exports.createOrder = async (req, res) => {
 // Получить заказ по ID
 exports.getOrderById = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id)
-            .populate('client', 'name')
-            .populate('carrier', 'name')
-            .populate('vehicleBodyType', 'name')
-            .populate('clientContact', 'fullName phones email');
+        const order = await Order.findByPk(req.params.id, {
+            include: [
+                { model: Client, as: 'client', attributes: ['name'] },
+                { model: Carrier, as: 'carrier', attributes: ['name'] },
+                { model: VehicleBodyType, as: 'vehicleBodyType', attributes: ['name'] },
+                { model: Contact, as: 'clientContact', attributes: ['fullName', 'phones', 'email'] }
+            ]
+        });
 
         if (!order) {
             return res.status(404).json({ message: 'Заказ не найден' });
@@ -61,15 +78,22 @@ exports.updateOrder = async (req, res) => {
 
         // Обновляем заказ напрямую из req.body
         // Фронтенд отправляет данные в правильной структуре
-        const updatedOrder = await Order.findByIdAndUpdate(
-            orderId,
-            req.body,
-            { new: true, runValidators: true }
-        ).populate('client carrier vehicleBodyType clientContact');
+        const [updatedCount] = await Order.update(req.body, {
+            where: { id: orderId }
+        });
 
-        if (!updatedOrder) {
+        if (updatedCount === 0) {
             return res.status(404).json({ message: 'Заказ не найден' });
         }
+
+        const updatedOrder = await Order.findByPk(orderId, {
+            include: [
+                { model: Client, as: 'client' },
+                { model: Carrier, as: 'carrier' },
+                { model: VehicleBodyType, as: 'vehicleBodyType' },
+                { model: Contact, as: 'clientContact' }
+            ]
+        });
 
         res.json(updatedOrder);
 
@@ -82,7 +106,7 @@ exports.updateOrder = async (req, res) => {
 // Удалить заказ
 exports.deleteOrder = async (req, res) => {
     try {
-        await Order.findByIdAndDelete(req.params.id);
+        await Order.destroy({ where: { id: req.params.id } });
         res.json({ message: 'Заказ удален' });
     } catch (err) {
         res.status(500).json({ message: err.message });

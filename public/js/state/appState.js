@@ -58,19 +58,19 @@ class AppState {
 
     // Utility methods
     getClientById(id) {
-        return this._clients.find(c => c._id === id);
+        return this._clients.find(c => c.id === id);
     }
 
     getCarrierById(id) {
-        return this._carriers.find(c => c._id === id);
+        return this._carriers.find(c => c.id === id);
     }
 
     getContactById(id) {
-        return this._contacts.find(c => c._id === id);
+        return this._contacts.find(c => c.id === id);
     }
 
     getOrderById(id) {
-        return this._orders.find(o => o._id === id);
+        return this._orders.find(o => o.id === id);
     }
 }
 

@@ -1,27 +1,27 @@
 export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = [], loadingTypes = [], packageTypes = []) {
     // 1. Генерируем опции для Типов Кузова
     const bodyTypeOptions = vehicleBodyTypes.map(type =>
-        `<option value="${type._id}">${type.name}</option>`
+        `<option value="${type.id}">${type.name}</option>`
     ).join('');
 
     // 2. Генерируем опции для Клиентов
     const clientOptions = clients.map(client =>
-        `<option value="${client._id}">${client.name}</option>`
+        `<option value="${client.id}">${client.name}</option>`
     ).join('');
 
     // 3. Генерируем опции для Перевозчиков
     const carrierOptions = carriers.map(carrier =>
-        `<option value="${carrier._id}">${carrier.name}</option>`
+        `<option value="${carrier.id}">${carrier.name}</option>`
     ).join('');
 
     // 4. Генерируем опции для Типов Загрузки
     const loadingTypeOptions = loadingTypes.map(type =>
-        `<option value="${type._id}">${type.name}</option>`
+        `<option value="${type.id}">${type.name}</option>`
     ).join('');
 
     // 5. Генерируем опции для Типов Упаковки
     const packageTypeOptions = packageTypes.map(type =>
-        `<option value="${type._id}">${type.name}</option>`
+        `<option value="${type.id}">${type.name}</option>`
     ).join('');
 
     // 6. Возвращаем HTML формы с Grid Layout

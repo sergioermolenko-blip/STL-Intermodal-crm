@@ -47,8 +47,8 @@ export async function saveContact(reloadCallback) {
         notes: formData.get('notes') || '',
         isActive: formData.get('isActive') === 'on',
         relatedTo: formData.get('relatedTo'),
-        client: formData.get('relatedTo') === 'client' ? formData.get('client') : null,
-        carrier: formData.get('relatedTo') === 'carrier' ? formData.get('carrier') : null
+        clientId: formData.get('relatedTo') === 'client' ? formData.get('client') : null,
+        carrierId: formData.get('relatedTo') === 'carrier' ? formData.get('carrier') : null
     };
 
     try {

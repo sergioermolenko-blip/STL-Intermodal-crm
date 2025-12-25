@@ -47,8 +47,8 @@ export function renderContactRow(contact) {
         <td>${companyType}</td>
         <td>${status}</td>
         <td class="actions">
-            <button class="btn-icon btn-edit-contact" data-id="${contact._id}">✏️</button>
-            <button class="btn-icon btn-delete-contact" data-id="${contact._id}">🗑️</button>
+            <button class="btn-icon btn-edit-contact" data-id="${contact.id}">✏️</button>
+            <button class="btn-icon btn-delete-contact" data-id="${contact.id}">🗑️</button>
         </td>
     `;
 

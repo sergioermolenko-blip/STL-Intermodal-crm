@@ -1,21 +1,29 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const vehicleBodyTypeSchema = new mongoose.Schema({
+const VehicleBodyType = sequelize.define('VehicleBodyType', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true
     },
     code: {
-        type: String
+        type: DataTypes.STRING,
+        allowNull: true
     },
     description: {
-        type: String
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.STRING,
+        allowNull: true
     }
+}, {
+    tableName: 'VehicleBodyTypes',
+    timestamps: true,
+    updatedAt: false
 });
 
-module.exports = mongoose.model('VehicleBodyType', vehicleBodyTypeSchema);
+module.exports = VehicleBodyType;

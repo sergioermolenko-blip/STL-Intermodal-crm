@@ -11,11 +11,11 @@
  */
 export function renderContactForm(contact = null, clients = [], carriers = []) {
     const clientOptions = clients.map(client =>
-        `<option value="${client._id}" ${contact?.client?._id === client._id ? 'selected' : ''}>${client.name}</option>`
+        `<option value="${client.id}" ${contact?.client?.id === client.id ? 'selected' : ''}>${client.name}</option>`
     ).join('');
 
     const carrierOptions = carriers.map(carrier =>
-        `<option value="${carrier._id}" ${contact?.carrier?._id === carrier._id ? 'selected' : ''}>${carrier.name}</option>`
+        `<option value="${carrier.id}" ${contact?.carrier?.id === carrier.id ? 'selected' : ''}>${carrier.name}</option>`
     ).join('');
 
     const relatedToClient = contact?.relatedTo === 'client' || !contact;
@@ -34,7 +34,7 @@ export function renderContactForm(contact = null, clients = [], carriers = []) {
 
     return `
         <form id="contactForm" class="modal-form">
-            <input type="hidden" id="contactId" value="${contact?._id || ''}">
+            <input type="hidden" id="contactId" value="${contact?.id || ''}">
             
             <div class="form-group">
                 <label for="contactFullName">ФИО *</label>

@@ -1,4 +1,4 @@
 const Carrier = require('../models/Carrier');
 const createEntityController = require('./baseEntityController');
 
-module.exports = createEntityController(Carrier, 'Перевозчик', 'carrier');
+module.exports = createEntityController(Carrier, 'Перевозчик', 'carrierId');

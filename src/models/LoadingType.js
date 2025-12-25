@@ -1,23 +1,29 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-// Обратите внимание: переменная называется loadingTypeSchema
-const loadingTypeSchema = new mongoose.Schema({
+const LoadingType = sequelize.define('LoadingType', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true
     },
     code: {
-        type: String
+        type: DataTypes.STRING,
+        allowNull: true
     },
     description: {
-        type: String
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.STRING,
+        allowNull: true
     }
+}, {
+    tableName: 'LoadingTypes',
+    timestamps: true, // createdAt и updatedAt автоматически
+    updatedAt: false  // отключаем updatedAt, оставляем только createdAt
 });
 
-// Экспортируем модель с именем 'LoadingType'
-module.exports = mongoose.model('LoadingType', loadingTypeSchema);
+module.exports = LoadingType;

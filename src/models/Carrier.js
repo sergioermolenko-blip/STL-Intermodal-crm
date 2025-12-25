@@ -1,16 +1,37 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const carrierSchema = new mongoose.Schema({
+const Carrier = sequelize.define('Carrier', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true
     },
-    inn: { type: String },
-    contactPerson: { type: String },
-    phone: { type: String },
-    email: { type: String },
-    createdAt: { type: Date, default: Date.now }
+    inn: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    contactPerson: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    phone: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: true
+    }
+}, {
+    tableName: 'Carriers',
+    timestamps: true,
+    updatedAt: false
 });
 
-module.exports = mongoose.model('Carrier', carrierSchema);
+module.exports = Carrier;

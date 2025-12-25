@@ -1,8 +1,10 @@
+const { Op } = require('sequelize');
+
 /**
  * Фабрика для создания CRUD контроллеров
- * @param {Model} Model - Mongoose модель
+ * @param {Model} Model - Sequelize модель
  * @param {string} entityNameRu - Название сущности на русском (в именительном падеже)
- * @param {string} relatedField - Поле в Order для проверки связей ('client' или 'carrier')
+ * @param {string} relatedField - Поле в Order для проверки связей ('clientId' или 'carrierId')
  * @returns {Object} Объект с CRUD методами
  */
 function createEntityController(Model, entityNameRu, relatedField) {
@@ -20,7 +22,7 @@ function createEntityController(Model, entityNameRu, relatedField) {
                     });
                 }
 
-                const existing = await Model.findOne({ name: name.trim() });
+                const existing = await Model.findOne({ where: { name: name.trim() } });
 
                 if (existing) {
                     return res.status(400).json({
@@ -45,7 +47,9 @@ function createEntityController(Model, entityNameRu, relatedField) {
         // Получить все сущности
         getAll: async (req, res) => {
             try {
-                const entities = await Model.find().sort({ createdAt: -1 });
+                const entities = await Model.findAll({
+                    order: [['createdAt', 'DESC']]
+                });
                 res.json(entities);
             } catch (err) {
                 res.status(500).json({ message: err.message });
@@ -64,8 +68,10 @@ function createEntityController(Model, entityNameRu, relatedField) {
                 }
 
                 const existing = await Model.findOne({
-                    name: name.trim(),
-                    _id: { $ne: req.params.id }
+                    where: {
+                        name: name.trim(),
+                        id: { [Op.ne]: req.params.id }
+                    }
                 });
 
                 if (existing) {
@@ -74,8 +80,7 @@ function createEntityController(Model, entityNameRu, relatedField) {
                     });
                 }
 
-                const updated = await Model.findByIdAndUpdate(
-                    req.params.id,
+                const [updatedCount, updatedRows] = await Model.update(
                     {
                         name: name.trim(),
                         inn: inn?.trim() || '',
@@ -83,15 +88,20 @@ function createEntityController(Model, entityNameRu, relatedField) {
                         phone: phone?.trim() || '',
                         email: email?.trim() || ''
                     },
-                    { new: true, runValidators: true }
+                    {
+                        where: { id: req.params.id },
+                        returning: true
+                    }
                 );
 
-                if (!updated) {
+                if (updatedCount === 0) {
                     return res.status(404).json({
                         message: `${entityNameRu} не найден`
                     });
                 }
 
+                // Для SQLite returning не работает, получаем обновленную запись отдельно
+                const updated = await Model.findByPk(req.params.id);
                 res.json(updated);
             } catch (err) {
                 res.status(400).json({ message: err.message });
@@ -103,7 +113,7 @@ function createEntityController(Model, entityNameRu, relatedField) {
             try {
                 const filter = {};
                 filter[relatedField] = req.params.id;
-                const ordersCount = await Order.countDocuments(filter);
+                const ordersCount = await Order.count({ where: filter });
 
                 if (ordersCount > 0) {
                     return res.status(400).json({
@@ -111,13 +121,15 @@ function createEntityController(Model, entityNameRu, relatedField) {
                     });
                 }
 
-                const deleted = await Model.findByIdAndDelete(req.params.id);
+                const deleted = await Model.findByPk(req.params.id);
 
                 if (!deleted) {
                     return res.status(404).json({
                         message: `${entityNameRu} не найден`
                     });
                 }
+
+                await Model.destroy({ where: { id: req.params.id } });
 
                 res.json({
                     message: `${entityNameRu} успешно удален`,

@@ -1,66 +1,114 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const orderSchema = new mongoose.Schema({
-    // Маршрут (вложенный объект)
-    route: {
-        from: { type: String, required: true },
-        to: { type: String, required: true }
+const Order = sequelize.define('Order', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-
-    // Данные о грузе (вложенный объект)
-    cargo: {
-        name: { type: String, required: true },
-        weight: { type: Number }
+    // Маршрут (сохраняем как отдельные поля)
+    routeFrom: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'route_from'
     },
-
+    routeTo: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'route_to'
+    },
+    // Данные о грузе
+    cargoName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        field: 'cargo_name'
+    },
+    cargoWeight: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+        field: 'cargo_weight'
+    },
     // Даты
-    dateLoading: { type: Date },
-    dateUnloading: { type: Date },
-
-    // Связь с Клиентом
-    client: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client'
+    dateLoading: {
+        type: DataTypes.DATE,
+        allowNull: true
     },
-
-    // Контактное лицо клиента
-    clientContact: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Contact'
+    dateUnloading: {
+        type: DataTypes.DATE,
+        allowNull: true
     },
-
-    // Связь с Перевозчиком
-    carrier: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Carrier'
+    // Связи с другими таблицами (Foreign Keys)
+    clientId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Clients',
+            key: 'id'
+        }
     },
-
-    // Тип кузова
-    vehicleBodyType: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'VehicleBodyType'
+    clientContactId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Contacts',
+            key: 'id'
+        }
     },
-
-    // Тип упаковки
-    packageType: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'PackageType'
+    carrierId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Carriers',
+            key: 'id'
+        }
     },
-
-    // Тип загрузки
-    loadingType: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'LoadingType'
+    vehicleBodyTypeId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'VehicleBodyTypes',
+            key: 'id'
+        }
     },
-
+    packageTypeId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'PackageTypes',
+            key: 'id'
+        }
+    },
+    loadingTypeId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'LoadingTypes',
+            key: 'id'
+        }
+    },
     // Финансы
-    clientRate: { type: Number },
-    carrierRate: { type: Number },
-    margin: { type: Number },
-
-    // Системные поля
-    status: { type: String, default: 'new' },
-    createdAt: { type: Date, default: Date.now }
+    clientRate: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    carrierRate: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    margin: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true
+    },
+    // Статус
+    status: {
+        type: DataTypes.STRING,
+        defaultValue: 'new'
+    }
+}, {
+    tableName: 'Orders',
+    timestamps: true,
+    updatedAt: false
 });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = Order;

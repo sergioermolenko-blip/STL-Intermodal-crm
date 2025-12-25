@@ -10,10 +10,10 @@ export function renderCompanyForm(type, entity = null, contacts = []) {
     const formId = `${type}Form`;
     const entityId = `${type}Id`;
 
-    const entityContacts = entity?._id
+    const entityContacts = entity?.id
         ? contacts.filter(c => {
             const field = isClient ? c.client : c.carrier;
-            return field?._id === entity._id || field === entity._id;
+            return field?.id === entity.id || field === entity.id;
         })
         : [];
 
@@ -27,8 +27,8 @@ export function renderCompanyForm(type, entity = null, contacts = []) {
                     </div>
                 </div>
                 <div class="company-contact-actions">
-                    <button type="button" class="btn-icon btn-edit-company-contact" data-contact-id="${contact._id}">✏️</button>
-                    <button type="button" class="btn-icon btn-delete-company-contact" data-contact-id="${contact._id}">🗑️</button>
+                    <button type="button" class="btn-icon btn-edit-company-contact" data-contact-id="${contact.id}">✏️</button>
+                    <button type="button" class="btn-icon btn-delete-company-contact" data-contact-id="${contact.id}">🗑️</button>
                 </div>
             </div>
         `).join('')
@@ -36,7 +36,7 @@ export function renderCompanyForm(type, entity = null, contacts = []) {
 
     return `
         <form id="${formId}" class="modal-form">
-            <input type="hidden" id="${entityId}" value="${entity?._id || ''}">
+            <input type="hidden" id="${entityId}" value="${entity?.id || ''}">
             
             <div class="form-group">
                 <label for="${type}Name">Название *</label>
@@ -63,7 +63,7 @@ export function renderCompanyForm(type, entity = null, contacts = []) {
                 <input type="email" id="${type}Email" name="email" value="${entity?.email || ''}">
             </div>
 
-            ${entity?._id ? `
+            ${entity?.id ? `
                 <div class="company-contacts-section">
                     <h3>Контакты компании</h3>
                     <div class="company-contacts-list">

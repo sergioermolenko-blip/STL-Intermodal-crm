@@ -70,8 +70,8 @@ export function createCompanyManager(config) {
                     <td>${item.email || '-'}</td>
                     <td>${createdAt}</td>
                     <td class="actions">
-                        <button class="btn-icon btn-edit" data-id="${item._id}" data-type="${type}">✏️</button>
-                        <button class="btn-icon btn-delete" data-id="${item._id}" data-type="${type}">🗑️</button>
+                        <button class="btn-icon btn-edit" data-id="${item.id}" data-type="${type}">✏️</button>
+                        <button class="btn-icon btn-delete" data-id="${item.id}" data-type="${type}">🗑️</button>
                     </td>
                 `;
 
@@ -150,12 +150,12 @@ export function createCompanyManager(config) {
         if (!companyId) return;
 
         const contacts = appState.contacts.filter(c =>
-            c[type]?._id === companyId || c[type] === companyId
+            c[type]?.id === companyId || c[type] === companyId
         );
 
         contacts.forEach(contact => {
             const option = document.createElement('option');
-            option.value = contact._id;
+            option.value = contact.id;
             option.textContent = `${contact.fullName} (${contact.phones[0]})`;
             contactSelect.appendChild(option);
         });

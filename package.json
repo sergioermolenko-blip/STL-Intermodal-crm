@@ -1,37 +1,23 @@
 {
-    "name": "stl-itermodal-crm",
-    "version": "1.0.0",
-    "description": "CRM система для экспедитора",
-    "main": "server.js",
     "scripts": {
-        "start": "node server.js",
         "dev": "nodemon server.js",
+        "start": "node server.js",
         "seed": "node seed.js",
-        "test": "vitest",
         "test:unit": "vitest run",
-        "test:unit:watch": "vitest",
         "test:e2e": "playwright test",
-        "test:e2e:ui": "playwright test --ui",
-        "test:all": "npm run test:unit && npm run test:e2e"
+        "test:all": "npm run test:unit && npm run test:e2e",
+        "git:commit": "powershell -ExecutionPolicy Bypass -File git-commit.ps1",
+        "git:quick": "powershell -ExecutionPolicy Bypass -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User'); git add . && git commit -m 'Quick commit' && git push\""
     },
-    "keywords": [
-        "crm",
-        "logistics",
-        "freight-forwarding"
-    ],
-    "author": "",
-    "license": "ISC",
     "dependencies": {
-        "cors": "^2.8.5",
-        "dotenv": "^16.3.1",
-        "express": "^4.18.2",
-        "mongoose": "^8.20.2"
+        "express": "^4.21.2",
+        "sequelize": "^6.35.2",
+        "sqlite3": "^5.1.7",
+        "dotenv": "^16.4.7"
     },
     "devDependencies": {
+        "@playwright/test": "^1.50.1",
         "nodemon": "^3.1.11",
-        "vitest": "^1.0.4",
-        "jsdom": "^23.0.1",
-        "@playwright/test": "^1.40.1",
-        "@vitest/ui": "^1.0.4"
+        "vitest": "^2.2.4"
     }
 }

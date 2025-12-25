@@ -33,24 +33,21 @@ export async function createOrder(event) {
     const formData = new FormData(form);
 
     const orderData = {
-        route: {
-            from: formData.get('route_from'),
-            to: formData.get('route_to')
-        },
-        cargo: {
-            name: formData.get('cargo_name'),
-            weight: parseFloat(formData.get('cargo_weight'))
-        },
+        // Flat structure for Sequelize (SQLite)
+        routeFrom: formData.get('route_from'),
+        routeTo: formData.get('route_to'),
+        cargoName: formData.get('cargo_name'),
+        cargoWeight: parseFloat(formData.get('cargo_weight')),
         dateLoading: formData.get('date_loading'),
         dateUnloading: formData.get('date_unloading'),
-        client: formData.get('client'),
-        clientContact: formData.get('clientContact') || null,
-        carrier: formData.get('carrier'),
+        clientId: formData.get('client'),
+        clientContactId: formData.get('clientContact') || null,
+        carrierId: formData.get('carrier'),
         clientRate: parseFloat(formData.get('clientRate')),
         carrierRate: parseFloat(formData.get('carrierRate')),
-        vehicleBodyType: formData.get('vehicleBodyType') || null,
-        packageType: formData.get('packageType') || null,
-        loadingType: formData.get('loadingType') || null
+        vehicleBodyTypeId: formData.get('vehicleBodyType') || null,
+        packageTypeId: formData.get('packageType') || null,
+        loadingTypeId: formData.get('loadingType') || null
     };
 
     try {

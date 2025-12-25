@@ -1,64 +1,73 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const contactSchema = new mongoose.Schema({
-    fullName: {
-        type: String,
-        required: true,
-        trim: true
+const Contact = sequelize.define('Contact', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-    phones: [{
-        type: String,
-        required: true
-    }],
+    fullName: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    phones: {
+        type: DataTypes.JSON, // Массив телефонов хранится как JSON
+        allowNull: false,
+        defaultValue: []
+    },
     email: {
-        type: String,
-        required: true,
-        trim: true,
-        lowercase: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            isEmail: true
+        }
     },
     notes: {
-        type: String
+        type: DataTypes.TEXT,
+        allowNull: true
     },
     isActive: {
-        type: Boolean,
-        default: true
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     },
     relatedTo: {
-        type: String,
-        enum: ['client', 'carrier'],
-        required: true
+        type: DataTypes.ENUM('client', 'carrier'),
+        allowNull: false
     },
-    client: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Client'
+    clientId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Clients',
+            key: 'id'
+        }
     },
-    carrier: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Carrier'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
+    carrierId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'Carriers',
+            key: 'id'
+        }
+    }
+}, {
+    tableName: 'Contacts',
+    timestamps: true,
+    hooks: {
+        // Валидация перед сохранением (аналог Mongoose pre-save hook)
+        beforeSave: (contact) => {
+            if (contact.relatedTo === 'client' && !contact.clientId) {
+                throw new Error('Client is required when relatedTo is client');
+            }
+            if (contact.relatedTo === 'carrier' && !contact.carrierId) {
+                throw new Error('Carrier is required when relatedTo is carrier');
+            }
+            if (!contact.phones || contact.phones.length === 0) {
+                throw new Error('At least one phone number is required');
+            }
+        }
     }
 });
 
-// Валидация: должен быть заполнен либо client, либо carrier
-contactSchema.pre('save', function(next) {
-    if (this.relatedTo === 'client' && !this.client) {
-        next(new Error('Client is required when relatedTo is client'));
-    }
-    if (this.relatedTo === 'carrier' && !this.carrier) {
-        next(new Error('Carrier is required when relatedTo is carrier'));
-    }
-    if (this.phones.length === 0) {
-        next(new Error('At least one phone number is required'));
-    }
-    this.updatedAt = Date.now();
-    next();
-});
-
-module.exports = mongoose.model('Contact', contactSchema);
+module.exports = Contact;

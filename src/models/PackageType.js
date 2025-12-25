@@ -1,23 +1,29 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-// Здесь переменная packageTypeSchema
-const packageTypeSchema = new mongoose.Schema({
+const PackageType = sequelize.define('PackageType', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     name: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true
     },
     code: {
-        type: String
+        type: DataTypes.STRING,
+        allowNull: true
     },
     description: {
-        type: String
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.STRING,
+        allowNull: true
     }
+}, {
+    tableName: 'PackageTypes',
+    timestamps: true,
+    updatedAt: false
 });
 
-// Экспортируем модель с именем 'PackageType'
-module.exports = mongoose.model('PackageType', packageTypeSchema);
+module.exports = PackageType;

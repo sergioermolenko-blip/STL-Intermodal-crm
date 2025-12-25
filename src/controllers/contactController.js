@@ -1,18 +1,24 @@
 const Contact = require('../models/Contact');
+const Client = require('../models/Client');
+const Carrier = require('../models/Carrier');
 
 exports.getAllContacts = async (req, res) => {
     try {
         const { client, carrier, isActive } = req.query;
 
         const filter = {};
-        if (client) filter.client = client;
-        if (carrier) filter.carrier = carrier;
+        if (client) filter.clientId = client;
+        if (carrier) filter.carrierId = carrier;
         if (isActive !== undefined) filter.isActive = isActive === 'true';
 
-        const contacts = await Contact.find(filter)
-            .populate('client', 'name')
-            .populate('carrier', 'name')
-            .sort({ createdAt: -1 });
+        const contacts = await Contact.findAll({
+            where: filter,
+            include: [
+                { model: Client, as: 'client', attributes: ['name'] },
+                { model: Carrier, as: 'carrier', attributes: ['name'] }
+            ],
+            order: [['createdAt', 'DESC']]
+        });
 
         res.json(contacts);
     } catch (err) {
@@ -22,9 +28,12 @@ exports.getAllContacts = async (req, res) => {
 
 exports.getContactById = async (req, res) => {
     try {
-        const contact = await Contact.findById(req.params.id)
-            .populate('client', 'name')
-            .populate('carrier', 'name');
+        const contact = await Contact.findByPk(req.params.id, {
+            include: [
+                { model: Client, as: 'client', attributes: ['name'] },
+                { model: Carrier, as: 'carrier', attributes: ['name'] }
+            ]
+        });
 
         if (!contact) {
             return res.status(404).json({ message: 'Контакт не найден' });
@@ -39,7 +48,15 @@ exports.getContactById = async (req, res) => {
 exports.createContact = async (req, res) => {
     try {
         const newContact = await Contact.create(req.body);
-        await newContact.populate('client carrier');
+
+        // Загружаем связанные данные
+        await newContact.reload({
+            include: [
+                { model: Client, as: 'client' },
+                { model: Carrier, as: 'carrier' }
+            ]
+        });
+
         res.status(201).json(newContact);
     } catch (error) {
         console.error("❌ Ошибка при создании контакта:", error);
@@ -51,15 +68,20 @@ exports.updateContact = async (req, res) => {
     try {
         const contactId = req.params.id;
 
-        const updatedContact = await Contact.findByIdAndUpdate(
-            contactId,
-            req.body,
-            { new: true, runValidators: true }
-        ).populate('client carrier');
+        const [updatedCount] = await Contact.update(req.body, {
+            where: { id: contactId }
+        });
 
-        if (!updatedContact) {
+        if (updatedCount === 0) {
             return res.status(404).json({ message: 'Контакт не найден' });
         }
+
+        const updatedContact = await Contact.findByPk(contactId, {
+            include: [
+                { model: Client, as: 'client' },
+                { model: Carrier, as: 'carrier' }
+            ]
+        });
 
         res.json(updatedContact);
     } catch (err) {
@@ -70,7 +92,7 @@ exports.updateContact = async (req, res) => {
 
 exports.deleteContact = async (req, res) => {
     try {
-        await Contact.findByIdAndDelete(req.params.id);
+        await Contact.destroy({ where: { id: req.params.id } });
         res.json({ message: 'Контакт удален' });
     } catch (err) {
         res.status(500).json({ message: err.message });

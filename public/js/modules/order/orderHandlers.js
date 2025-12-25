@@ -21,9 +21,9 @@ export function openOrderModal(id) {
     // Генерируем HTML формы редактирования (упрощенная версия)
     const formHTML = `
         <form id="orderEditForm" class="modal-form">
-            <input type="hidden" id="orderId" value="${order._id}">
+            <input type="hidden" id="orderId" value="${order.id}">
             <p>Функция редактирования заказа будет добавлена позже</p>
-            <p>Заказ: ${order.route?.from} → ${order.route?.to}</p>
+            <p>Заказ: ${order.routeFrom} → ${order.routeTo}</p>
         </form>
     `;
 
