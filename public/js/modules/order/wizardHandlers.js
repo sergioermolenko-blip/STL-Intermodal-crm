@@ -213,14 +213,42 @@ async function saveDraft() {
     }
 
     const orderData = {
-        ...wizardState.data,
+        clientId: wizardState.data.clientId || null,
+        carrierId: wizardState.data.carrierId || null,
+        routeFrom: wizardState.data.routeFrom || null,
+        routeTo: wizardState.data.routeTo || null,
+        cargoName: wizardState.data.cargoName || null,
+        cargoWeight: parseFloat(wizardState.data.cargoWeight) || null,
+        dateLoading: wizardState.data.dateLoading || null,
+        dateUnloading: wizardState.data.dateUnloading || null,
+        clientRate: parseFloat(wizardState.data.clientRate) || 0,
+        carrierRate: parseFloat(wizardState.data.carrierRate) || 0,
+        transportMode: wizardState.data.transportMode || 'tbd',
+        direction: wizardState.data.direction || null,
+        vehicleBodyTypeId: wizardState.data.vehicleBodyTypeId || null,
+        packageTypeId: wizardState.data.packageTypeId || null,
+        notes: wizardState.data.notes || null,
         status: 'draft'
     };
 
     try {
-        // TODO: Вызов API для сохранения
+        const response = await fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка сохранения');
+        }
+
         showMessage('Черновик сохранён!', 'success');
+
+        const { loadOrders } = await import('../orderManager.js');
+        await loadOrders();
     } catch (error) {
+        console.error('Ошибка сохранения черновика:', error);
         showMessage(`Ошибка: ${error.message}`, 'error');
     }
 }

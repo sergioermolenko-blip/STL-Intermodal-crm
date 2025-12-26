@@ -66,21 +66,4 @@ test.describe('Orders', () => {
         const editForm = page.locator('#orderEditForm');
         await expect(editForm).toBeVisible();
     });
-
-    test.skip('should create a new order (covered by wizard tests)', async ({ page }) => {
-        // This test is now covered by the wizard test
-        // Wizard functionality is tested in 'should open edit modal when clicking edit button'
-    });
-
-    test.skip('should display profit calculation (covered by wizard)', async ({ page }) => {
-        // Profit calculation is tested via wizard
-    });
-
-    test.skip('should delete an order (requires wizard implementation)', async ({ page }) => {
-        // Delete functionality works but test needs wizard-based order creation
-    });
-
-    test.skip('should cancel deletion when clicking Cancel (requires wizard)', async ({ page }) => {
-        // Cancel deletion works but test needs wizard-based order creation  
-    });
 });

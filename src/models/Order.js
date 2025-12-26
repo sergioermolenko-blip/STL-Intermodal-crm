@@ -10,18 +10,18 @@ const Order = sequelize.define('Order', {
     // Маршрут (сохраняем как отдельные поля)
     routeFrom: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Nullable for drafts
         field: 'route_from'
     },
     routeTo: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Nullable for drafts
         field: 'route_to'
     },
     // Данные о грузе
     cargoName: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true, // Nullable for drafts
         field: 'cargo_name'
     },
     cargoWeight: {

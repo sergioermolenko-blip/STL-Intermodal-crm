@@ -12,9 +12,9 @@ test.describe('Wizard Form', () => {
         const wizardBtn = page.locator('#newOrderWizardBtn');
         await wizardBtn.click();
 
-        // Проверяем, что модальное окно появилось (даём больше времени)
-        await page.waitForSelector('.wizard-container', { timeout: 10000 });
-        await expect(page.locator('.wizard-container')).toBeVisible();
+        // Ждем появления поля клиента (надежный селектор)
+        await page.waitForSelector('#wizardClientId', { timeout: 5000 });
+        await expect(page.locator('#wizardClientId')).toBeVisible();
 
         // Проверяем заголовок
         await expect(page.locator('.wizard-header h2')).toContainText('Создание заказа');
@@ -25,7 +25,7 @@ test.describe('Wizard Form', () => {
 
         // Открываем wizard
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container', { timeout: 10000 });
+        await page.waitForSelector('#wizardClientId', { timeout: 5000 });
 
         // Проверяем 5 секций
         const sections = page.locator('.wizard-step');
@@ -44,7 +44,7 @@ test.describe('Wizard Form', () => {
 
         // Открываем wizard
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container', { timeout: 10000 });
+        await page.waitForSelector('#wizardForm', { timeout: 10000 });
 
         // Проверяем первая секция активна
         await expect(page.locator('.wizard-step.active').first()).toContainText('Клиент');
@@ -64,7 +64,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container', { timeout: 10000 });
+        await page.waitForSelector('#wizardForm', { timeout: 10000 });
 
         // Пытаемся нажать "Далее" без заполнения клиента
         await page.click('#wizardBtnNext');
@@ -77,7 +77,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('#wizardForm');
 
         // Заполняем секцию Client
         await page.waitForSelector('#wizardClientId option:not([value=""])', { state: 'attached', timeout: 5000 });
@@ -92,7 +92,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('#wizardForm');
 
         // Секция 1: Client
         await page.waitForSelector('#wizardClientId option:not([value=""])', { state: 'attached', timeout: 5000 });
@@ -132,7 +132,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('#wizardForm');
 
         // Заполняем Client
         await page.waitForSelector('#wizardClientId option:not([value=""])', { state: 'attached', timeout: 5000 });
@@ -150,7 +150,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('#wizardForm');
 
         // Проверяем что модальное окно открыто
         await expect(page.locator('#dynamicModal')).toBeVisible();
@@ -166,7 +166,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('#wizardForm');
 
         // Переходим к секции Finance
         await page.waitForSelector('#wizardClientId option:not([value=""])', { state: 'attached', timeout: 5000 });
