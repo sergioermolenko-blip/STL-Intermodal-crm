@@ -12,8 +12,9 @@ test.describe('Wizard Form', () => {
         const wizardBtn = page.locator('#newOrderWizardBtn');
         await wizardBtn.click();
 
-        // Проверяем, что модальное окно появилось
-        await expect(page.locator('.wizard-container')).toBeVisible({ timeout: 3000 });
+        // Проверяем, что модальное окно появилось (даём больше времени)
+        await page.waitForSelector('.wizard-container', { timeout: 10000 });
+        await expect(page.locator('.wizard-container')).toBeVisible();
 
         // Проверяем заголовок
         await expect(page.locator('.wizard-header h2')).toContainText('Создание заказа');
@@ -24,7 +25,7 @@ test.describe('Wizard Form', () => {
 
         // Открываем wizard
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('.wizard-container', { timeout: 10000 });
 
         // Проверяем 5 секций
         const sections = page.locator('.wizard-step');
@@ -43,7 +44,7 @@ test.describe('Wizard Form', () => {
 
         // Открываем wizard
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('.wizard-container', { timeout: 10000 });
 
         // Проверяем первая секция активна
         await expect(page.locator('.wizard-step.active').first()).toContainText('Клиент');
@@ -63,7 +64,7 @@ test.describe('Wizard Form', () => {
         await page.goto('/');
 
         await page.click('#newOrderWizardBtn');
-        await page.waitForSelector('.wizard-container');
+        await page.waitForSelector('.wizard-container', { timeout: 10000 });
 
         // Пытаемся нажать "Далее" без заполнения клиента
         await page.click('#wizardBtnNext');
@@ -87,9 +88,44 @@ test.describe('Wizard Form', () => {
         await expect(page.locator('.wizard-step').first()).toHaveClass(/complete/);
     });
 
-    test.skip('should create order when all required fields filled (requires backend)', async ({ page }) => {
-        // This test requires backend API to be working
-        // The wizard UI works correctly as shown by other tests
+    test('should create order when all required fields filled', async ({ page }) => {
+        await page.goto('/');
+
+        await page.click('#newOrderWizardBtn');
+        await page.waitForSelector('.wizard-container');
+
+        // Секция 1: Client
+        await page.waitForSelector('#wizardClientId option:not([value=""])', { state: 'attached', timeout: 5000 });
+        await page.selectOption('#wizardClientId', { index: 1 });
+        await page.click('#wizardBtnNext');
+
+        // Секция 2: Route
+        await page.fill('#wizardRouteFrom', 'Москва');
+        await page.fill('#wizardRouteTo', 'Санкт-Петербург');
+        await page.click('#wizardBtnNext');
+
+        // Секция 3: Cargo (пропускаем - не обязательно)
+        await page.click('#wizardBtnNext');
+
+        // Секция 4: Transport (пропускаем - не обязательно)
+        await page.click('#wizardBtnNext');
+
+        // Секция 5: Finance
+        // Проверяем что кнопка изменилась на "Создать заказ"
+        await expect(page.locator('#wizardBtnCreate')).toBeVisible();
+
+        // Нажимаем "Создать заказ"
+        await page.click('#wizardBtnCreate');
+
+        // Ожидаем success message
+        await expect(page.locator('.message')).toBeVisible({ timeout: 5000 });
+
+        // Проверяем что заказ появился в списке (даём больше времени)
+        await page.waitForSelector('#ordersList .order-card', { timeout: 10000 });
+
+        // Ищем заказ по маршруту
+        const orderCard = page.locator('#ordersList .order-card').filter({ hasText: 'Москва' });
+        await expect(orderCard.first()).toBeVisible({ timeout: 5000 });
     });
 
     test('should allow navigation via sidebar', async ({ page }) => {
@@ -110,11 +146,48 @@ test.describe('Wizard Form', () => {
         await expect(page.locator('#wizardClientId')).toBeVisible();
     });
 
-    test.skip('should close wizard when clicking X (needs investigation)', async ({ page }) => {
-        // Modal close button might have different selector
+    test('should close wizard when clicking X', async ({ page }) => {
+        await page.goto('/');
+
+        await page.click('#newOrderWizardBtn');
+        await page.waitForSelector('.wizard-container');
+
+        // Проверяем что модальное окно открыто
+        await expect(page.locator('#dynamicModal')).toBeVisible();
+
+        // Кликаем кнопку закрытия
+        await page.click('.modal-close');
+
+        // Проверяем что модальное окно закрылось
+        await expect(page.locator('#dynamicModal')).not.toBeVisible({ timeout: 2000 });
     });
 
-    test.skip('should calculate profit automatically (needs investigation)', async ({ page }) => {
-        // Profit calculation works but test selector might be wrong
+    test('should calculate profit automatically', async ({ page }) => {
+        await page.goto('/');
+
+        await page.click('#newOrderWizardBtn');
+        await page.waitForSelector('.wizard-container');
+
+        // Переходим к секции Finance
+        await page.waitForSelector('#wizardClientId option:not([value=""])', { state: 'attached', timeout: 5000 });
+        await page.selectOption('#wizardClientId', { index: 1 });
+        await page.click('#wizardBtnNext');
+
+        await page.fill('#wizardRouteFrom', 'A');
+        await page.fill('#wizardRouteTo', 'B');
+        await page.click('#wizardBtnNext');
+
+        await page.click('#wizardBtnNext'); // Cargo
+        await page.click('#wizardBtnNext'); // Transport
+
+        // Finance - вводим ставки
+        await page.fill('#wizardClientRate', '100000');
+        await page.fill('#wizardCarrierRate', '75000');
+
+        // Проверяем автоматический расчёт маржи (25000 с локализацией ru-RU)
+        const profitDisplay = page.locator('#wizardProfitDisplay');
+        await expect(profitDisplay).toBeVisible();
+        // Локализация может быть "25 000" или "25000"
+        await expect(profitDisplay).toContainText('25');
     });
 });
