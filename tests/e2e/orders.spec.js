@@ -32,6 +32,25 @@ test.describe('Orders', () => {
         await expect(page.locator('#carrierSelect')).toBeVisible();
         await expect(page.locator('#client_rate')).toBeVisible();
         await expect(page.locator('#carrier_rate')).toBeVisible();
+        // Фаза 1: новые поля
+        await expect(page.locator('#transportMode')).toBeVisible();
+        await expect(page.locator('#direction')).toBeVisible();
+    });
+
+    // Фаза 1: Тест для статуса и бейджа
+    test('should display status badge in order cards', async ({ page }) => {
+        await page.goto('/');
+
+        // Ждем загрузки списка заказов
+        await page.waitForSelector('#ordersList .order-card', { timeout: 10000 });
+
+        // Проверяем что хотя бы один бейдж статуса отображается
+        const statusBadge = page.locator('#ordersList .status-badge').first();
+        await expect(statusBadge).toBeVisible();
+
+        // Проверяем что бейдж транспорта отображается
+        const transportBadge = page.locator('#ordersList .transport-badge').first();
+        await expect(transportBadge).toBeVisible();
     });
 
     test('should create a new order', async ({ page }) => {
