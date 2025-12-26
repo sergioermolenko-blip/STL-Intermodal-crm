@@ -80,6 +80,10 @@ const seedDB = async () => {
         console.log('⏳ Подключаемся к SQLite...');
         await connectDB();
 
+        // Синхронизация схемы (добавит новые колонки)
+        await sequelize.sync({ alter: true });
+        console.log('   ✓ Схема БД синхронизирована');
+
         // ============================================
         // ШАГ 1: УДАЛЕНИЕ ВСЕХ ДАННЫХ
         // ============================================
@@ -201,7 +205,10 @@ const seedDB = async () => {
                 loadingTypeId: createdLoadingTypes[i % createdLoadingTypes.length].id,
                 clientRate: Math.floor(Math.random() * 50000) + 30000, // от 30k до 80k
                 carrierRate: Math.floor(Math.random() * 40000) + 20000, // от 20k до 60k
-                status: ['new', 'in_progress', 'completed'][i % 3]
+                // Новые статусы (Фаза 1)
+                status: ['draft', 'inquiry', 'confirmed', 'in_transit', 'delivered'][i % 5],
+                transportMode: ['auto', 'rail', 'sea', 'air', 'multimodal'][i % 5],
+                direction: ['import', 'export', 'domestic', 'transit'][i % 4]
             });
         }
 

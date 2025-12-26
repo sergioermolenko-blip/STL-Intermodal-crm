@@ -100,10 +100,30 @@ const Order = sequelize.define('Order', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true
     },
-    // Статус
+    // === НОВЫЕ ПОЛЯ (Фаза 1) ===
+    // Уникальный номер заказа
+    shipmentNumber: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    // Статус заказа
+    // Допустимые: draft, inquiry, carrier_quote, quotes_received, proposal_draft,
+    // proposal_sent, client_approved, booking, confirmed, picked_up, export_customs,
+    // departed, in_transit, arrived, import_customs, partial, delivered,
+    // invoiced, paid, closed, expired, declined, cancelled, hold, problem, returned, lost
     status: {
         type: DataTypes.STRING,
-        defaultValue: 'new'
+        defaultValue: 'draft'
+    },
+    // Тип транспорта: auto, rail, sea, air, multimodal, tbd
+    transportMode: {
+        type: DataTypes.STRING,
+        defaultValue: 'tbd'
+    },
+    // Направление: import, export, domestic, transit
+    direction: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 }, {
     tableName: 'Orders',
