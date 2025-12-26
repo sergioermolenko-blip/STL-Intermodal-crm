@@ -67,11 +67,42 @@ export async function createOrder(event) {
 
 /**
  * Обновить заказ
+ * @param {number} id - ID заказа
+ * @param {Function} reloadCallback - Функция для перезагрузки списка
+ * @returns {Promise<boolean>} true если успешно, false если ошибка
  */
-export async function updateOrder() {
-    // Заглушка - будет реализовано позже
-    showMessage('Функция обновления заказа будет добавлена позже', 'info');
-    return false;
+export async function updateOrder(id, reloadCallback) {
+    const form = document.getElementById('orderEditForm');
+    if (!form) return false;
+
+    const formData = new FormData(form);
+
+    const orderData = {
+        routeFrom: formData.get('routeFrom'),
+        routeTo: formData.get('routeTo'),
+        cargoName: formData.get('cargoName'),
+        cargoWeight: parseFloat(formData.get('cargoWeight')) || 0,
+        dateLoading: formData.get('dateLoading') || null,
+        dateUnloading: formData.get('dateUnloading') || null,
+        clientRate: parseFloat(formData.get('clientRate')) || 0,
+        carrierRate: parseFloat(formData.get('carrierRate')) || 0,
+        // Фаза 1: новые поля
+        transportMode: formData.get('transportMode') || 'tbd',
+        direction: formData.get('direction') || null
+    };
+
+    try {
+        await apiUpdateOrder(id, orderData);
+        showMessage('Заказ успешно обновлен!', 'success');
+        if (reloadCallback) {
+            await reloadCallback();
+        }
+        return true;
+    } catch (error) {
+        console.error('❌ Ошибка обновления заказа:', error);
+        showMessage(`Ошибка: ${error.message}`, 'error');
+        return false;
+    }
 }
 
 /**

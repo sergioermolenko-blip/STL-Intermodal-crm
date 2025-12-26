@@ -53,6 +53,30 @@ test.describe('Orders', () => {
         await expect(transportBadge).toBeVisible();
     });
 
+    // E2E тест для модального окна редактирования
+    test('should open edit modal when clicking edit button', async ({ page }) => {
+        await page.goto('/');
+
+        // Ждем загрузки списка заказов
+        await page.waitForSelector('#ordersList .order-card', { timeout: 10000 });
+
+        // Кликаем на кнопку редактирования первого заказа
+        const editBtn = page.locator('.btn-edit-order').first();
+        await editBtn.click();
+
+        // Проверяем что модальное окно появилось
+        const modal = page.locator('#dynamicModal');
+        await expect(modal).toBeVisible();
+
+        // Проверяем заголовок модального окна
+        const modalTitle = page.locator('.modal-header h2');
+        await expect(modalTitle).toContainText('Редактирование заказа');
+
+        // Проверяем наличие формы редактирования
+        const editForm = page.locator('#orderEditForm');
+        await expect(editForm).toBeVisible();
+    });
+
     test('should create a new order', async ({ page }) => {
         await page.goto('/');
 
