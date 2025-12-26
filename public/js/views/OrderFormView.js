@@ -85,6 +85,31 @@ export function renderOrderForm(vehicleBodyTypes = [], clients = [], carriers = 
                             <input type="date" name="date_unloading" id="date_unloading">
                         </div>
                     </div>
+
+                    <!-- Фаза 1: Тип транспорта и направление -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Тип транспорта</label>
+                            <select name="transportMode" id="transportMode">
+                                <option value="tbd" selected>❓ Не определён</option>
+                                <option value="auto">🚛 Авто</option>
+                                <option value="rail">🚂 ЖД</option>
+                                <option value="sea">🚢 Море</option>
+                                <option value="air">✈️ Авиа</option>
+                                <option value="multimodal">🔄 Мультимодал</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Направление</label>
+                            <select name="direction" id="direction">
+                                <option value="" selected>Не выбрано</option>
+                                <option value="import">🔽 Импорт</option>
+                                <option value="export">🔼 Экспорт</option>
+                                <option value="domestic">🏠 Внутренняя</option>
+                                <option value="transit">↔️ Транзит</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Блок 3: Груз и Транспорт -->

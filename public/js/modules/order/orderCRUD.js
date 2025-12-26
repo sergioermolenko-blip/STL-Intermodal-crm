@@ -47,7 +47,10 @@ export async function createOrder(event) {
         carrierRate: parseFloat(formData.get('carrierRate')),
         vehicleBodyTypeId: formData.get('vehicleBodyType') || null,
         packageTypeId: formData.get('packageType') || null,
-        loadingTypeId: formData.get('loadingType') || null
+        loadingTypeId: formData.get('loadingType') || null,
+        // Фаза 1: новые поля
+        transportMode: formData.get('transportMode') || 'tbd',
+        direction: formData.get('direction') || null
     };
 
     try {
