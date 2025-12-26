@@ -1,0 +1,85 @@
+/**
+ * Status Colors (Phase 1)
+ * Цвета для бейджей статусов заказов
+ */
+
+/* === Базовый стиль бейджа === */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* === До подтверждения === */
+.status-draft           { background: #9E9E9E; }  /* Серый */
+.status-inquiry         { background: #2196F3; }  /* Синий */
+.status-carrier_quote   { background: #03A9F4; }  /* Голубой */
+.status-quotes_received { background: #00BCD4; }  /* Бирюзовый */
+.status-proposal_draft  { background: #009688; }  /* Темно-бирюзовый */
+.status-proposal_sent   { background: #FF9800; }  /* Оранжевый */
+.status-client_approved { background: #8BC34A; }  /* Светло-зеленый */
+
+/* === Бронирование === */
+.status-booking         { background: #CDDC39; color: #333; }  /* Лайм */
+.status-confirmed       { background: #4CAF50; }  /* Зеленый */
+
+/* === Исполнение === */
+.status-picked_up       { background: #4CAF50; }  /* Зеленый */
+.status-export_customs  { background: #7B1FA2; }  /* Фиолетовый */
+.status-departed        { background: #3F51B5; }  /* Индиго */
+.status-in_transit      { background: #3F51B5; }  /* Индиго */
+.status-arrived         { background: #00897B; }  /* Темно-бирюзовый */
+.status-import_customs  { background: #7B1FA2; }  /* Фиолетовый */
+.status-partial         { background: #FFC107; color: #333; }  /* Желтый */
+.status-delivered       { background: #4CAF50; }  /* Зеленый */
+
+/* === Финансы === */
+.status-invoiced        { background: #FFC107; color: #333; }  /* Желтый */
+.status-paid            { background: #8BC34A; }  /* Светло-зеленый */
+.status-closed          { background: #607D8B; }  /* Серо-голубой */
+
+/* === Исключения === */
+.status-expired         { background: #795548; }  /* Коричневый */
+.status-declined        { background: #F44336; }  /* Красный */
+.status-cancelled       { background: #F44336; }  /* Красный */
+.status-hold            { background: #FF5722; }  /* Темно-оранжевый */
+.status-problem         { background: #E91E63; }  /* Розовый */
+.status-returned        { background: #9C27B0; }  /* Пурпурный */
+.status-lost            { background: #B71C1C; }  /* Темно-красный */
+
+/* === Transport Mode бейджи === */
+.transport-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 6px;
+}
+
+.transport-auto       { background: #E3F2FD; color: #1565C0; }
+.transport-rail       { background: #FFF3E0; color: #E65100; }
+.transport-sea        { background: #E0F7FA; color: #00838F; }
+.transport-air        { background: #F3E5F5; color: #7B1FA2; }
+.transport-multimodal { background: #ECEFF1; color: #455A64; }
+.transport-tbd        { background: #FAFAFA; color: #9E9E9E; }
+
+/* === Direction бейджи === */
+.direction-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.direction-import   { background: #E8F5E9; color: #2E7D32; }
+.direction-export   { background: #FFF8E1; color: #F57F17; }
+.direction-domestic { background: #E3F2FD; color: #1565C0; }
+.direction-transit  { background: #FCE4EC; color: #C2185B; }

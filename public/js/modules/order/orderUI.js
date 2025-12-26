@@ -5,6 +5,82 @@
 
 import { formatDate } from '../../utils/formHelpers.js';
 
+// === ФАЗА 1: Словари для статусов ===
+const STATUS_LABELS = {
+    draft: 'Черновик',
+    inquiry: 'Запрос',
+    carrier_quote: 'Запрос ставок',
+    quotes_received: 'Ставки получены',
+    proposal_draft: 'Подготовка КП',
+    proposal_sent: 'КП отправлено',
+    client_approved: 'Одобрено',
+    booking: 'Букинг',
+    confirmed: 'Подтверждён',
+    picked_up: 'Забран',
+    export_customs: 'Экспорт таможня',
+    departed: 'Отправлен',
+    in_transit: 'В пути',
+    arrived: 'Прибыл',
+    import_customs: 'Импорт таможня',
+    partial: 'Частично',
+    delivered: 'Доставлен',
+    invoiced: 'Счёт выставлен',
+    paid: 'Оплачен',
+    closed: 'Закрыт',
+    expired: 'Истёк',
+    declined: 'Отклонён',
+    cancelled: 'Отменён',
+    hold: 'Приостановлен',
+    problem: 'Проблема',
+    returned: 'Возврат',
+    lost: 'Утерян'
+};
+
+const TRANSPORT_LABELS = {
+    auto: '🚛 Авто',
+    rail: '🚂 ЖД',
+    sea: '🚢 Море',
+    air: '✈️ Авиа',
+    multimodal: '🔄 Мультимодал',
+    tbd: '❓ Не определён'
+};
+
+const DIRECTION_LABELS = {
+    import: 'Импорт',
+    export: 'Экспорт',
+    domestic: 'Внутр.',
+    transit: 'Транзит'
+};
+
+/**
+ * Получить русское название статуса
+ * @param {string} status - Код статуса
+ * @returns {string} Русское название
+ */
+export function getStatusLabel(status) {
+    return STATUS_LABELS[status] || status || 'Неизвестно';
+}
+
+/**
+ * Отрендерить бейдж статуса
+ * @param {string} status - Код статуса
+ * @returns {string} HTML бейджа
+ */
+export function renderStatusBadge(status) {
+    const label = getStatusLabel(status);
+    return `<span class="status-badge status-${status}">${label}</span>`;
+}
+
+/**
+ * Отрендерить бейдж транспорта
+ * @param {string} mode - Код транспорта
+ * @returns {string} HTML бейджа
+ */
+export function renderTransportBadge(mode) {
+    const label = TRANSPORT_LABELS[mode] || mode || '';
+    return mode ? `<span class="transport-badge transport-${mode}">${label}</span>` : '';
+}
+
 /**
  * Рассчитать прибыль от заказа
  * 
@@ -64,6 +140,8 @@ export function renderOrderCard(order) {
     orderCard.innerHTML = `
         <div class="order-header">
             <div class="order-route">
+                ${renderStatusBadge(order.status)}
+                ${renderTransportBadge(order.transportMode)}
                 <strong>${order.routeFrom || 'Не указано'}</strong> → <strong>${order.routeTo || 'Не указано'}</strong>
             </div>
             <div class="order-actions">
