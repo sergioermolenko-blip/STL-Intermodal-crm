@@ -5,9 +5,7 @@
         "seed": "node seed.js",
         "test:unit": "vitest run",
         "test:e2e": "playwright test",
-        "test:all": "npm run test:unit && npm run test:e2e",
-        "git:commit": "powershell -ExecutionPolicy Bypass -File git-commit.ps1",
-        "git:quick": "powershell -ExecutionPolicy Bypass -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User'); git add . && git commit -m 'Quick commit' && git push\""
+        "test:all": "npm run test:unit && npm run test:e2e"
     },
     "dependencies": {
         "express": "^4.21.2",
