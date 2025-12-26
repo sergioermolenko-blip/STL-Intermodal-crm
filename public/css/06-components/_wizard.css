@@ -1,0 +1,249 @@
+/* ============================================
+   WIZARD - Component
+   ============================================ */
+
+.wizard-container {
+    display: flex;
+    min-height: 500px;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Wizard modal specific */
+.wizard-modal {
+    width: 95%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow: hidden;
+}
+
+/* Card header with action button */
+.card-header-with-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.card-header-with-actions h2 {
+    margin: 0;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+.wizard-sidebar {
+    width: 220px;
+    background: var(--bg-color);
+    border-right: 1px solid var(--border-color);
+    padding: var(--space-md);
+}
+
+.wizard-step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    margin-bottom: var(--space-xs);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-base);
+    color: var(--text-secondary);
+}
+
+.wizard-step:hover {
+    background: var(--card-bg);
+}
+
+.wizard-step.active {
+    background: var(--primary);
+    color: white;
+}
+
+.wizard-step.complete {
+    color: var(--success);
+}
+
+.wizard-step.error {
+    color: var(--danger);
+}
+
+.wizard-step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.wizard-step.active .wizard-step-number {
+    background: white;
+    color: var(--primary);
+}
+
+.wizard-step.complete .wizard-step-number {
+    background: var(--success);
+    color: white;
+}
+
+.wizard-step.complete .wizard-step-number::after {
+    content: '✓';
+}
+
+.wizard-step.complete .wizard-step-number {
+    font-size: 0;
+}
+
+.wizard-step.complete .wizard-step-number::after {
+    font-size: var(--text-sm);
+}
+
+.wizard-step.error .wizard-step-number {
+    background: var(--danger);
+    color: white;
+}
+
+.wizard-step-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+}
+
+/* ============================================
+   CONTENT
+   ============================================ */
+
+.wizard-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-lg);
+}
+
+.wizard-header {
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.wizard-header h2 {
+    margin: 0;
+    font-size: var(--text-2xl);
+    color: var(--text-primary);
+}
+
+.wizard-form {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.wizard-section h3 {
+    margin: 0 0 var(--space-lg) 0;
+    font-size: var(--text-xl);
+    color: var(--text-primary);
+}
+
+/* ============================================
+   ACTIONS
+   ============================================ */
+
+.wizard-actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: space-between;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-color);
+}
+
+.wizard-actions .btn-outline {
+    margin-right: auto;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.wizard-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+}
+
+.wizard-form .form-group {
+    margin-bottom: var(--space-md);
+}
+
+.wizard-form .checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.wizard-form .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+}
+
+.wizard-form .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+/* Profit display */
+.profit-display .profit-value {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--success);
+    padding: var(--space-sm);
+    background: var(--bg-color);
+    border-radius: var(--radius-sm);
+}
+
+.profit-value.negative {
+    color: var(--danger);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .wizard-container {
+        flex-direction: column;
+    }
+
+    .wizard-sidebar {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: var(--space-sm);
+    }
+
+    .wizard-step {
+        flex-direction: column;
+        min-width: 80px;
+        text-align: center;
+        margin-bottom: 0;
+        margin-right: var(--space-xs);
+    }
+
+    .wizard-step-label {
+        font-size: var(--text-xs);
+    }
+
+    .wizard-form .form-row {
+        grid-template-columns: 1fr;
+    }
+}

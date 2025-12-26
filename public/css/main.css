@@ -30,6 +30,7 @@
 @import url('/css/06-components/_tables.css');
 @import url('/css/06-components/_modals.css');
 @import url('/css/06-components/_messages.css');
+@import url('/css/06-components/_wizard.css');
 
 /* 07 - FEATURES: Feature-specific styles */
 @import url('/css/07-features/_orders.css');

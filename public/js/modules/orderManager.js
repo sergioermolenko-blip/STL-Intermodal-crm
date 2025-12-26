@@ -6,6 +6,7 @@
 import { loadOrdersData, createOrder, updateOrder, deleteOrder } from './order/orderCRUD.js';
 import { renderOrdersList } from './order/orderUI.js';
 import { handleOrderClick, openOrderModal, initOrderHandlers } from './order/orderHandlers.js';
+import { openWizard, closeWizard } from './order/wizardHandlers.js';
 
 /**
  * Загрузить и отобразить список заказов
@@ -37,10 +38,16 @@ export function init() {
         createOrderWithReload,
         (event) => handleOrderClick(event, loadOrders)
     );
+
+    // Кнопка "Новый заказ (Wizard)"
+    const newOrderWizardBtn = document.getElementById('newOrderWizardBtn');
+    if (newOrderWizardBtn) {
+        newOrderWizardBtn.addEventListener('click', () => openWizard());
+    }
 }
 
 // Реэкспорт функций для обратной совместимости
-export { createOrder, updateOrder, deleteOrder, openOrderModal };
+export { createOrder, updateOrder, deleteOrder, openOrderModal, openWizard, closeWizard };
 
 // Экспорт объекта менеджера
 export const orderManager = {
@@ -50,5 +57,7 @@ export const orderManager = {
     updateOrder,
     deleteOrder,
     openOrderModal,
+    openWizard,
+    closeWizard,
     handleOrderClick: (event) => handleOrderClick(event, loadOrders)
 };
