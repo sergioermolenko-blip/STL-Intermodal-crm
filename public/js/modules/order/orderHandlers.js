@@ -13,7 +13,7 @@ import { deleteOrder, updateOrder } from './orderCRUD.js';
  * @param {string} id - ID заказа
  */
 export function openOrderModal(id) {
-    const order = appState.getOrderById(id);
+    const order = appState.getOrderById(Number(id));
     if (!order) return;
 
     const title = 'Редактирование заказа';
