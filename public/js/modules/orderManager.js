@@ -5,7 +5,7 @@
 
 import { loadOrdersData, createOrder, updateOrder, deleteOrder } from './order/orderCRUD.js';
 import { renderOrdersList } from './order/orderUI.js';
-import { handleOrderClick, openOrderModal, initOrderHandlers } from './order/orderHandlers.js';
+import { handleOrderClick, openOrderModal, initOrderClickHandler } from './order/orderHandlers.js';
 import { openWizard, closeWizard } from './order/wizardHandlers.js';
 
 /**
@@ -27,17 +27,8 @@ export async function loadOrders() {
  * Инициализация модуля
  */
 export function init() {
-    const createOrderWithReload = async (event) => {
-        const success = await createOrder(event);
-        if (success) {
-            loadOrders();
-        }
-    };
-
-    initOrderHandlers(
-        createOrderWithReload,
-        (event) => handleOrderClick(event, loadOrders)
-    );
+    // Обработчик кликов по списку заказов (edit/delete)
+    initOrderClickHandler((event) => handleOrderClick(event, loadOrders));
 
     // Кнопка "Новый заказ (Wizard)"
     const newOrderWizardBtn = document.getElementById('newOrderWizardBtn');
@@ -46,7 +37,7 @@ export function init() {
     }
 }
 
-// Реэкспорт функций для обратной совместимости
+// Реэкспорт функций
 export { createOrder, updateOrder, deleteOrder, openOrderModal, openWizard, closeWizard };
 
 // Экспорт объекта менеджера

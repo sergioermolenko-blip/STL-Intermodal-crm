@@ -4,7 +4,7 @@
  */
 
 import { appState } from '../../state/appState.js';
-import { renderOrderForm } from '../../views/OrderFormView.js';
+
 import { modalView } from '../../views/ModalView.js';
 import { deleteOrder, updateOrder } from './orderCRUD.js';
 
@@ -140,28 +140,10 @@ async function handleDeleteOrder(id, reloadCallback) {
 }
 
 /**
- * Инициализация модуля заказов
- * @param {Function} createOrderCallback - Функция для создания заказа
+ * Инициализация обработчика кликов по списку заказов
  * @param {Function} handleClickCallback - Функция для обработки кликов
  */
-export function initOrderHandlers(createOrderCallback, handleClickCallback) {
-    const orderFormContainer = document.getElementById('orderFormContainer');
-    if (orderFormContainer) {
-        orderFormContainer.innerHTML = renderOrderForm(
-            appState.dictionaries.vehicleBodyTypes,
-            appState.clients,
-            appState.carriers,
-            appState.dictionaries.loadingTypes,
-            appState.dictionaries.packageTypes
-        );
-
-        // Привязываем event listener ПОСЛЕ рендера
-        const orderForm = document.getElementById('createOrderForm');
-        if (orderForm) {
-            orderForm.addEventListener('submit', createOrderCallback);
-        }
-    }
-
+export function initOrderClickHandler(handleClickCallback) {
     const ordersList = document.getElementById('ordersList');
     if (ordersList) {
         ordersList.addEventListener('click', handleClickCallback);
